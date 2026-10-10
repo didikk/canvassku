@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "stores",
+  "info": {
+    "singularName": "store",
+    "pluralName": "stores",
+    "displayName": "Store",
+    "description": "Store master data for canvassing visits"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "address": {
+      "type": "text"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "visit_reports": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::visit-report.visit-report",
+      "mappedBy": "store"
+    }
+  }
+}

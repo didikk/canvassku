@@ -17,7 +17,7 @@ Canvassku is an offline-first mobile sales canvassing application built for fiel
    - If a request is a simple read/write pass-through, the ViewModel MUST call the `Repository` directly.
 4. **Dependency Injection (Koin Compiler Plugin):**
    - Uses native `io.insert-koin.compiler.plugin` (Kotlin K2 IR plugin; no KSP processor needed for Koin).
-   - Annotated with `@Module`, `@ComponentScan("com.canvassku")`, `@Single`, `@Factory`, `@KoinViewModel` processed at compile-time directly by the Kotlin compiler.
+   - Annotated with `@Module`, `@ComponentScan("com.didik.canvassku")`, `@Single`, `@Factory`, `@KoinViewModel` processed at compile-time directly by the Kotlin compiler.
    - DI module is located at `core/di/AppModule.kt` and initialized in `CanvasskuApp.kt`.
 5. **Offline-First Paradigm:**
    - Room Database acts as the Single Source of Truth (SSOT).
@@ -28,7 +28,7 @@ Canvassku is an offline-first mobile sales canvassing application built for fiel
 ## Package Directory Structure
 
 ```text
-com.canvassku/
+com.didik.canvassku/
 ├── CanvasskuApp.kt                     # Application class with Koin startKoin
 ├── MainActivity.kt                     # Single Activity with SplashScreen API & Navigation3
 ├── core/

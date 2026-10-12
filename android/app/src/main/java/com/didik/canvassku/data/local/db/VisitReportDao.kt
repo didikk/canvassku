@@ -21,6 +21,14 @@ interface VisitReportDao {
     @Query("SELECT * FROM visit_reports WHERE syncStatus = :status")
     suspend fun getBySyncStatus(status: String): List<VisitReportEntity>
 
+    @Query(
+        """
+        SELECT COUNT(*) FROM visit_reports
+        WHERE syncStatus IN ('PENDING_SYNC', 'FAILED')
+        """,
+    )
+    fun observePendingCount(): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(report: VisitReportEntity)
 

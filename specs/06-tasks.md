@@ -23,13 +23,13 @@
 
 ## Phase 3: Auth & Store List (Dashboard)
 
-- [ ] Implement `installSplashScreen()` in `MainActivity` with `setKeepOnScreenCondition` bound to `AuthPreferences` initial check, setting start route directly to `HomeScreen` or `LoginScreen`.
-- [ ] Implement Retrofit API interface (`StrapiApi`) using Kotlin `suspend` functions.
-- [ ] Implement OkHttp `AuthInterceptor` and `Authenticator` for attaching `Bearer` tokens, handling silent token refresh on 401 response, and emitting `AuthEffect.ForceReLogin` channel effect on refresh failure.
-- [ ] Implement `LoginScreen` UI matching `@specs/DESIGN.md` and `LoginViewModel` inside `presentation/screens/auth/` (MVVM with StateFlow backing fields, Channel effects, and `LoginUiState` sealed interface).
-- [ ] Implement initial store master data fetch (`GET /api/stores`) post-login to seed Room DB.
-- [ ] Implement `HomeScreen` UI inside `presentation/screens/home/` displaying stores directly from Room DB (`Flow<List<Store>>`).
-- [ ] Add TopAppBar with manual sync trigger button and logout action.
+- [x] Implement `installSplashScreen()` in `MainActivity` with `setKeepOnScreenCondition` bound to `AuthPreferences` initial check, setting start route directly to `HomeScreen` or `LoginScreen`.
+- [x] Implement Retrofit API interface (`StrapiApi`) using Kotlin `suspend` functions.
+- [x] Implement OkHttp `AuthInterceptor` and `Authenticator` for attaching `Bearer` tokens, handling silent token refresh on 401 response, and emitting `AuthEffect.ForceReLogin` channel effect on refresh failure.
+- [x] Implement `LoginScreen` UI matching `@specs/DESIGN.md` and `LoginViewModel` inside `presentation/screens/auth/` (MVVM with StateFlow backing fields, Channel effects, and `LoginState`).
+- [x] Implement initial store master data fetch (`GET /api/stores`) post-login to seed Room DB.
+- [x] Implement `HomeScreen` UI inside `presentation/screens/home/` displaying stores directly from Room DB (`Flow<List<Store>>`).
+- [x] Add TopAppBar with manual sync trigger button and logout action.
 
 ## Phase 4: Visit Form & Offline Engine
 

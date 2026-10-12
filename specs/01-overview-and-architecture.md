@@ -10,7 +10,10 @@ Canvassku is an offline-first mobile sales canvassing application built for fiel
    - Presentation -> Domain -> Data layer separation.
 2. **ViewModel, State & Side-Effects:**
    - **UI State:** Exposed via Kotlin Flow backing fields (`_uiState` MutableStateFlow + `uiState` StateFlow).
-   - **Exclusive State:** Represented via `sealed class` or `sealed interface` (`Idle`, `Loading`, `Success`, `Error`).
+   - **State naming:** Screen state types use the `*State` suffix (e.g. `LoginState`, `HomeState`), not `*UiState`.
+   - **Single state holder:** Form fields and exclusive status live in one `*State` object (no parallel `StateFlow`s for the same screen).
+   - **State updates:** Always mutate via `_uiState.update { ... }` (never `_uiState.value = ...`) for consistency and atomic copies.
+   - **Exclusive Status:** Nested or sibling `sealed class` / `sealed interface` for mutually exclusive modes (`Idle`, `Loading`, `Success`, `Error`).
    - **Side-Effects:** One-time UI events (navigation, snackbar) sent via Kotlin `Channel` (`_effect` Channel + `effect` Flow).
 3. **Domain & UseCase Rules:**
    - Create `UseCase` ONLY when domain business logic validation is required OR when orchestrating multiple repositories.
@@ -19,6 +22,7 @@ Canvassku is an offline-first mobile sales canvassing application built for fiel
    - Uses native `io.insert-koin.compiler.plugin` (Kotlin K2 IR plugin; no KSP processor needed for Koin).
    - Annotated with `@Module`, `@ComponentScan("com.didik.canvassku")`, `@Single`, `@Factory`, `@KoinViewModel` processed at compile-time directly by the Kotlin compiler.
    - DI module is located at `core/di/AppModule.kt` and initialized in `CanvasskuApp.kt`.
+   - Interface binding is automatic: a `@Singleton` / `@Factory` implementation class is bound to its supertypes. Do not add manual `provideX(impl): Interface` wrappers.
 5. **Offline-First Paradigm:**
    - Room Database acts as the Single Source of Truth (SSOT).
    - UI strictly reads from and writes to Room DB.
@@ -53,8 +57,10 @@ com.didik.canvassku/
 └── presentation/
     ├── navigation/                     # NavRoute contracts & Navigation3 Root NavHost
     └── screens/                        # Encapsulated Screen Features
-        ├── auth/                       # LoginViewModel, LoginScreen
-        ├── home/                       # HomeViewModel, HomeScreen (Store List / Dashboard)
+        ├── auth/                       # LoginViewModel, LoginScreen, LoginState
+        ├── home/                       # HomeViewModel, HomeScreen, HomeState
+        │   └── components/             # EmptyStoresState, StoreCard (when >1 sub-composables)
         ├── visit_form/                 # VisitFormViewModel, VisitFormScreen
         └── visit_detail/               # VisitDetailViewModel, VisitDetailScreen
 ```
+

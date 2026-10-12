@@ -15,8 +15,6 @@ data class HomeState(
     val filter: StoreFilter = StoreFilter.ALL,
     val pendingReportCount: Int = 0,
     val isSyncing: Boolean = false,
-    val isSendingPending: Boolean = false,
-    val errorMessage: String? = null,
 ) {
     val filteredStores: List<StoreListItem>
         get() = when (filter) {

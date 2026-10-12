@@ -47,7 +47,7 @@ class HomeViewModel(
 
     fun onSyncClick() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSyncing = true, errorMessage = null) }
+            _uiState.update { it.copy(isSyncing = true) }
             storeRepository.syncStores()
                 .onSuccess {
                     _uiState.update { it.copy(isSyncing = false) }
@@ -58,7 +58,7 @@ class HomeViewModel(
                         is IOException -> "Sinkronisasi gagal. Periksa jaringan, data lokal tetap ditampilkan."
                         else -> "Sinkronisasi gagal. Coba lagi."
                     }
-                    _uiState.update { it.copy(isSyncing = false, errorMessage = message) }
+                    _uiState.update { it.copy(isSyncing = false) }
                     _effect.send(HomeEffect.ShowMessage(message))
                 }
         }

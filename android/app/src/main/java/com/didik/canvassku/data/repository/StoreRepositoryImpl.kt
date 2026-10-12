@@ -14,12 +14,7 @@ import com.didik.canvassku.domain.model.StoreVisitStatus
 import com.didik.canvassku.domain.repository.StoreRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Singleton
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 @Singleton
 class StoreRepositoryImpl(
@@ -28,12 +23,6 @@ class StoreRepositoryImpl(
     private val storeDao: StoreDao,
     private val visitReportDao: VisitReportDao,
 ) : StoreRepository {
-    override fun observeStores(): Flow<List<Store>> {
-        return storeDao.observeAll().map { entities ->
-            entities.map { it.toDomain() }
-        }
-    }
-
     override fun observeStoreListItems(): Flow<List<StoreListItem>> {
         return combine(
             storeDao.observeAll(),
@@ -45,12 +34,11 @@ class StoreRepositoryImpl(
 
             stores.map { entity ->
                 val report = latestByStore[entity.id]
-                val status = report.toVisitStatus()
                 StoreListItem(
                     store = entity.toDomain(),
-                    status = status,
+                    status = report.toVisitStatus(),
                     latestReportId = report?.id,
-                    statusDetail = report?.toStatusDetail(status),
+                    latestReportCreatedAt = report?.createdAt,
                 )
             }
         }
@@ -89,31 +77,10 @@ class StoreRepositoryImpl(
         }
     }
 
-    private fun VisitReportEntity.toStatusDetail(status: StoreVisitStatus): String {
-        val time = formatWib(createdAt)
-        return when (status) {
-            StoreVisitStatus.PENDING_SYNC -> "Laporan tersimpan: $time WIB (Draft)"
-            StoreVisitStatus.SYNCED -> "Selesai dikunjungi: $time WIB"
-            StoreVisitStatus.NOT_VISITED -> ""
-        }
-    }
-
-    private fun formatWib(epochMillis: Long): String = WIB_TIME_FORMAT.get()!!.format(Date(epochMillis))
-
     private fun StoreEntity.toDomain(): Store = Store(
         id = id,
         name = name,
         address = address,
         ownerName = ownerName,
     )
-
-    private companion object {
-        val WIB_TIME_FORMAT = object : ThreadLocal<SimpleDateFormat>() {
-            override fun initialValue(): SimpleDateFormat {
-                return SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).apply {
-                    timeZone = TimeZone.getTimeZone("Asia/Jakarta")
-                }
-            }
-        }
-    }
 }

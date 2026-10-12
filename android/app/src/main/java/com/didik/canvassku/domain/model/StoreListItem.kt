@@ -10,5 +10,5 @@ data class StoreListItem(
     val store: Store,
     val status: StoreVisitStatus,
     val latestReportId: String? = null,
-    val statusDetail: String? = null,
+    val latestReportCreatedAt: Long? = null,
 )

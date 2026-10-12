@@ -45,6 +45,10 @@ import com.didik.canvassku.core.design.SurfaceContainerLowest
 import com.didik.canvassku.core.design.TertiaryFixed
 import com.didik.canvassku.domain.model.StoreListItem
 import com.didik.canvassku.domain.model.StoreVisitStatus
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun StoreCard(
@@ -134,9 +138,9 @@ fun StoreCard(
                         )
                     }
                 }
-                if (!item.statusDetail.isNullOrBlank()) {
+                item.statusDetailText()?.let { detail ->
                     Text(
-                        text = item.statusDetail,
+                        text = detail,
                         style = MaterialTheme.typography.labelMedium,
                         color = statusStyle.detailColor,
                         modifier = Modifier.padding(top = 2.dp),
@@ -179,6 +183,20 @@ private data class StoreStatusStyle(
     val detailColor: Color,
     val actionLabel: String,
 )
+
+private fun StoreListItem.statusDetailText(): String? {
+    val createdAt = latestReportCreatedAt ?: return null
+    val time = WIB_TIME_FORMAT.format(Date(createdAt))
+    return when (status) {
+        StoreVisitStatus.PENDING_SYNC -> "Laporan tersimpan: $time WIB (Draft)"
+        StoreVisitStatus.SYNCED -> "Selesai dikunjungi: $time WIB"
+        StoreVisitStatus.NOT_VISITED -> null
+    }
+}
+
+private val WIB_TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).apply {
+    timeZone = TimeZone.getTimeZone("Asia/Jakarta")
+}
 
 private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
     return when (this) {

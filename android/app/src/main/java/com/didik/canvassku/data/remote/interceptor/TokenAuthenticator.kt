@@ -59,7 +59,6 @@ class TokenAuthenticator(
                         authPreferences.saveSession(
                             jwtToken = outcome.body.jwt,
                             refreshToken = outcome.body.refreshToken ?: refreshToken,
-                            tokenTimestamp = System.currentTimeMillis(),
                         )
                         response.request.newBuilder()
                             .header(

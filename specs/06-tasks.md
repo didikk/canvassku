@@ -11,15 +11,15 @@
 
 ## Phase 2: Android Infrastructure, Architecture & Theme Setup
 
-- [ ] Configure `gradle/libs.versions.toml` and `build.gradle.kts` dependencies for Room DB, Koin (using native Koin Compiler Plugin), Navigation3, Jetpack DataStore, WorkManager, Retrofit2 + OkHttp3, Play Services Location, and Core Splashscreen (`androidx.core:core-splashscreen`).
-- [ ] Apply the Koin Compiler Plugin (`io.insert-koin.compiler.plugin`) in `build.gradle.kts`.
-- [ ] Establish package folder structure under `com.didik.canvassku` (`core/`, `data/`, `domain/`, `presentation/navigation/`, `presentation/screens/`).
-- [ ] Create Material 3 Compose Theme (`Color.kt`, `Theme.kt`, `Type.kt`) mapping colors, typography, and shapes directly from `@specs/DESIGN.md`.
-- [ ] Configure Android 12+ Splash Screen theme (`Theme.App.Starting`) with Deep Blue (`#1A365D`) background and icon branding.
-- [ ] Implement Jetpack DataStore wrapper (`AuthPreferences`) storing `jwt_token`, `refresh_token`, and `token_timestamp`.
-- [ ] Implement Room DB entities (`StoreEntity`, `VisitReportEntity`), DAOs (`StoreDao`, `VisitReportDao`), and `AppDatabase`.
-- [ ] Configure Koin Module in `core/di/AppModule.kt` using `@Module` and `@ComponentScan("com.didik.canvassku")` annotations and initialize Koin in `CanvasskuApp.kt`.
-- [ ] Setup Navigation3 route contracts (`sealed interface NavRoute`) and root `NavHost` / stack controller in `presentation/navigation/`.
+- [x] Configure `gradle/libs.versions.toml` and `build.gradle.kts` dependencies for Room DB, Koin (using native Koin Compiler Plugin), Navigation3, Jetpack DataStore, WorkManager, Retrofit2 + OkHttp3, Play Services Location, and Core Splashscreen (`androidx.core:core-splashscreen`).
+- [x] Apply the Koin Compiler Plugin (`io.insert-koin.compiler.plugin`) in `build.gradle.kts`.
+- [x] Establish package folder structure under `com.didik.canvassku` (`core/`, `data/`, `domain/`, `presentation/navigation/`, `presentation/screens/`).
+- [x] Create Material 3 Compose Theme (`Color.kt`, `Theme.kt`, `Type.kt`) mapping colors, typography, and shapes directly from `@specs/DESIGN.md`.
+- [x] Configure Android 12+ Splash Screen theme (`Theme.App.Starting`) with Deep Blue (`#1A365D`) background and icon branding.
+- [x] Implement Jetpack DataStore wrapper (`AuthPreferences`) storing `jwt_token`, `refresh_token`, and `token_timestamp`.
+- [x] Implement Room DB entities (`StoreEntity`, `VisitReportEntity`), DAOs (`StoreDao`, `VisitReportDao`), and `AppDatabase`.
+- [x] Configure Koin Module in `core/di/AppModule.kt` using `@Module` and `@ComponentScan("com.didik.canvassku")` annotations and initialize Koin in `CanvasskuApp.kt`.
+- [x] Setup Navigation3 route contracts (`sealed interface NavRoute`) and root `NavHost` / stack controller in `presentation/navigation/`.
 
 ## Phase 3: Auth & Store List (Dashboard)
 

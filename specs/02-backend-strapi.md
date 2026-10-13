@@ -32,3 +32,10 @@
   - `stores`: `find`, `findOne`
   - `visit-reports`: `create`, `find`, `findOne` (`find` is required for post-login Room seed via `GET /api/visit-reports?populate=*`)
   - `upload` (`plugin::upload.content-api.upload`): required so the app can upload photos before creating a visit report (Strapi 5 no longer accepts `files.*` on entry create)
+
+## Bootstrap Seed Accounts
+
+Seeded on Strapi bootstrap (idempotent; skips if email already exists):
+
+- **Admin** (Strapi Admin Panel): `admin@mail.test` / `admin123!`
+- **App user** (`users-permissions`, Authenticated role): `budi@mail.test` / `sales123!`

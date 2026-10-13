@@ -43,6 +43,19 @@ const SEED_STORES = [
   },
 ] as const;
 
+const SEED_ADMIN = {
+  email: 'admin@mail.test',
+  password: 'admin123!',
+  firstname: 'Admin',
+  lastname: 'Canvassku',
+} as const;
+
+const SEED_APP_USER = {
+  username: 'budi',
+  email: 'budi@mail.test',
+  password: 'sales123!',
+} as const;
+
 async function ensurePermissions(
   strapi: Core.Strapi,
   roleType: 'public' | 'authenticated',
@@ -85,12 +98,74 @@ async function seedStores(strapi: Core.Strapi) {
   strapi.log.info(`Seeded ${SEED_STORES.length} dummy stores.`);
 }
 
+async function seedAdmin(strapi: Core.Strapi) {
+  const existing = await strapi.db.query('admin::user').findOne({
+    where: { email: SEED_ADMIN.email },
+  });
+  if (existing) {
+    strapi.log.info(`Admin already seeded (${SEED_ADMIN.email}); skipping.`);
+    return;
+  }
+
+  const superAdminRole = await strapi.db.query('admin::role').findOne({
+    where: { code: 'strapi-super-admin' },
+  });
+  if (!superAdminRole) {
+    strapi.log.warn('Super admin role not found; skipping admin seed.');
+    return;
+  }
+
+  await strapi.admin.services.user.create({
+    email: SEED_ADMIN.email,
+    firstname: SEED_ADMIN.firstname,
+    lastname: SEED_ADMIN.lastname,
+    password: SEED_ADMIN.password,
+    registrationToken: null,
+    isActive: true,
+    roles: [superAdminRole.id],
+  });
+
+  strapi.log.info(`Seeded admin ${SEED_ADMIN.email}.`);
+}
+
+async function seedAppUser(strapi: Core.Strapi) {
+  const existing = await strapi.db.query('plugin::users-permissions.user').findOne({
+    where: { email: SEED_APP_USER.email },
+  });
+  if (existing) {
+    strapi.log.info(`App user already seeded (${SEED_APP_USER.email}); skipping.`);
+    return;
+  }
+
+  const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+    where: { type: 'authenticated' },
+  });
+  if (!authenticatedRole) {
+    strapi.log.warn('Authenticated role not found; skipping app user seed.');
+    return;
+  }
+
+  await strapi.plugin('users-permissions').service('user').add({
+    username: SEED_APP_USER.username,
+    email: SEED_APP_USER.email,
+    password: SEED_APP_USER.password,
+    confirmed: true,
+    blocked: false,
+    provider: 'local',
+    role: authenticatedRole.id,
+  });
+
+  strapi.log.info(`Seeded app user ${SEED_APP_USER.email}.`);
+}
+
 export default {
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
 
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await ensurePermissions(strapi, 'public', PUBLIC_AUTH_ACTIONS);
     await ensurePermissions(strapi, 'authenticated', AUTHENTICATED_ACTIONS);
+    await seedAdmin(strapi);
+    await seedAppUser(strapi);
     await seedStores(strapi);
   },
 };

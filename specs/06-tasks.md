@@ -8,6 +8,7 @@
 - [x] Create Content Type `visit-reports` (fields: `store` [Relation -> Has One `stores`], `latitude` [Float, Req], `longitude` [Float, Req], `order_notes` [Text, Req], `photo` [Media Single, Req]).
 - [x] Configure Public Role permissions for auth endpoints (`POST /api/auth/local`, `POST /api/auth/refresh-token`) and Authenticated Role permissions for `stores` and `visit-reports`.
 - [x] Seed 5 initial dummy stores in Strapi Admin Panel.
+- [x] Seed bootstrap accounts: admin `admin@mail.test` / `admin123!` and app user `budi@mail.test` / `sales123!`.
 
 ## Phase 2: Android Infrastructure, Architecture & Theme Setup
 

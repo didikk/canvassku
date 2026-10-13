@@ -18,6 +18,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.didik.canvassku.core.util.EnsureLocalNetworkPermission
 import com.didik.canvassku.data.remote.AuthEffect
 import com.didik.canvassku.data.remote.AuthEventBus
 import com.didik.canvassku.presentation.screens.auth.LoginScreen
@@ -31,6 +32,9 @@ fun CanvasskuNavHost(startRoute: NavRoute) {
     val authEventBus = koinInject<AuthEventBus>()
     val snackbarHostState = remember { SnackbarHostState() }
     var sessionExpiredMessage by remember { mutableStateOf<String?>(null) }
+
+    // targetSdk 37+: LAN / 10.0.2.2 needs ACCESS_LOCAL_NETWORK or OkHttp times out.
+    EnsureLocalNetworkPermission()
 
     LaunchedEffect(authEventBus) {
         authEventBus.effects.collect { effect ->

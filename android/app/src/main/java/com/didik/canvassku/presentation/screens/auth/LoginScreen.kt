@@ -1,5 +1,7 @@
 package com.didik.canvassku.presentation.screens.auth
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,10 +35,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,6 +58,9 @@ import com.didik.canvassku.core.design.PrimaryContainer
 import com.didik.canvassku.core.design.Surface
 import com.didik.canvassku.core.design.SurfaceContainerLow
 import com.didik.canvassku.core.design.SurfaceContainerLowest
+import com.didik.canvassku.core.util.ACCESS_LOCAL_NETWORK_PERMISSION
+import com.didik.canvassku.core.util.hasAccessLocalNetworkPermission
+import com.didik.canvassku.core.util.requiresAccessLocalNetworkRuntime
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -63,8 +72,38 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
     val isLoading = uiState.status is LoginState.Status.Loading
-    val errorMessage = (uiState.status as? LoginState.Status.Error)?.message ?: sessionExpiredMessage
+    var localNetworkDenied by remember { mutableStateOf(false) }
+    val errorMessage = (uiState.status as? LoginState.Status.Error)?.message
+        ?: sessionExpiredMessage
+        ?: if (localNetworkDenied) {
+            "Izin jaringan lokal diperlukan untuk terhubung ke server pengembangan."
+        } else {
+            null
+        }
+
+    val localNetworkLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            localNetworkDenied = false
+            viewModel.onLoginClick()
+        } else {
+            localNetworkDenied = true
+        }
+    }
+
+    val submitLogin: () -> Unit = {
+        focusManager.clearFocus()
+        localNetworkDenied = false
+        onClearSessionMessage()
+        if (!requiresAccessLocalNetworkRuntime() || context.hasAccessLocalNetworkPermission()) {
+            viewModel.onLoginClick()
+        } else {
+            localNetworkLauncher.launch(ACCESS_LOCAL_NETWORK_PERMISSION)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -200,10 +239,7 @@ fun LoginScreen(
                         imeAction = ImeAction.Done,
                     ),
                     keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            viewModel.onLoginClick()
-                        },
+                        onDone = { submitLogin() },
                     ),
                     shape = RoundedCornerShape(12.dp),
                     colors = loginFieldColors(),
@@ -220,10 +256,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = {
-                        focusManager.clearFocus()
-                        viewModel.onLoginClick()
-                    },
+                    onClick = submitLogin,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),

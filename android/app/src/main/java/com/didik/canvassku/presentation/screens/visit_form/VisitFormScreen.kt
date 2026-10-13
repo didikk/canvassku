@@ -105,7 +105,7 @@ fun VisitFormScreen(
     }
 
     val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = TakePictureWithGrant(),
+        contract = ActivityResultContracts.TakePicture(),
     ) { success ->
         val file = pendingCameraFile
         pendingCameraFile = null
@@ -115,31 +115,23 @@ fun VisitFormScreen(
             file?.delete()
             if (success) {
                 scope.launch {
-                    snackbarHostState.showSnackbar(
-                        "Kamera tidak menghasilkan foto. Cek kamera perangkat atau AVD.",
-                    )
+                    snackbarHostState.showSnackbar("Kamera tidak menghasilkan foto. Coba lagi.")
                 }
             }
         }
     }
 
     val launchCamera: () -> Unit = {
-        if (!context.canLaunchImageCapture()) {
-            scope.launch {
-                snackbarHostState.showSnackbar("Kamera tidak tersedia di perangkat ini.")
-            }
-        } else {
-            val cameraDir = File(context.cacheDir, "camera").apply { mkdirs() }
-            val photoFile = File(cameraDir, "capture_${System.currentTimeMillis()}.jpg")
-            photoFile.createNewFile()
-            pendingCameraFile = photoFile
-            val uri: Uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                photoFile,
-            )
-            takePictureLauncher.launch(uri)
-        }
+        val cameraDir = File(context.cacheDir, "camera").apply { mkdirs() }
+        val photoFile = File(cameraDir, "capture_${System.currentTimeMillis()}.jpg")
+        photoFile.createNewFile()
+        pendingCameraFile = photoFile
+        val uri: Uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            photoFile,
+        )
+        takePictureLauncher.launch(uri)
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(

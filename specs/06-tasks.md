@@ -33,15 +33,27 @@
 
 ## Phase 4: Visit Form & Offline Engine
 
-- [ ] Implement `FusedLocationProviderClient` wrapper for passive GPS locking in `core/util/`.
-- [ ] Implement Camera launcher & local photo compression utility (`context.filesDir`).
-- [ ] Implement `VisitFormScreen` UI inside `presentation/screens/visit_form/` with automatic location badge, photo preview, order notes field, and submit button.
-- [ ] Implement `VisitFormViewModel` calling `SaveVisitReportUseCase` to persist reports directly to Room DB with `syncStatus = "PENDING_SYNC"`.
-- [ ] Implement `SyncReportWorker` (`CoroutineWorker`) in `data/worker/` with `NetworkType.CONNECTED` constraint to query pending records, perform silent token refresh if needed, upload multipart payloads to Strapi, and update Room status (`SYNCED` / `FAILED`).
+- [x] Implement `FusedLocationProviderClient` wrapper for passive GPS locking in `core/util/`.
+- [x] Implement Camera launcher & local photo compression utility (`context.filesDir`).
+- [x] Implement `VisitFormScreen` UI inside `presentation/screens/visit_form/` with automatic location badge, photo preview, order notes field, and submit button.
+- [x] Implement `VisitFormViewModel` calling `SaveVisitReportUseCase` to persist reports directly to Room DB with `syncStatus = "PENDING_SYNC"`.
+- [x] Implement `SyncReportWorker` (`CoroutineWorker`) in `data/worker/` with `NetworkType.CONNECTED` constraint to query pending records, perform silent token refresh if needed, upload multipart payloads to Strapi, and update Room status (`SYNCED` / `FAILED`).
 
 ## Phase 5: Read-Only Visit Detail & Edge Case Verification
 
 - [ ] Implement `VisitDetailScreen` UI inside `presentation/screens/visit_detail/` for viewing saved/synced report details with status `AssistChip` (`PENDING_SYNC`, `SYNCED`, `FAILED`).
-- [ ] Add manual retry button on `VisitDetailScreen` for reports with status `FAILED`.
 - [ ] Test offline token bypass: Create a visit report offline with an expired JWT (> 5m) and verify instant save to Room DB without blocking the user.
 - [ ] Test auto-sync recovery: Create report offline, then reconnect network and verify `SyncReportWorker` auto-uploads to Strapi.
+
+## Phase 6: Automated Testing & Verification
+
+- [ ] **Unit Tests (Data Layer):**
+  - [ ] Write `AuthInterceptor` & `TokenAuthenticator` tests using `MockWebServer` to verify silent 401 token refresh logic and retry flow.
+  - [ ] Write `AuthPreferences` test using in-memory DataStore to verify token persistence and clear session actions.
+- [ ] **Unit Tests (Domain / ViewModel):**
+  - [ ] Write `VisitFormViewModelTest` verifying that saving a report triggers `SaveVisitReportUseCase` and transitions UI state to `Success`.
+  - [ ] Write `SaveVisitReportUseCaseTest` to verify that offline reports are saved to Room DB with `syncStatus = "PENDING_SYNC"`.
+- [ ] **Integration Tests (Room DB):**
+  - [ ] Write Room DAO in-memory database tests (`StoreDaoTest`, `VisitReportDaoTest`) verifying reactive `Flow` emissions and status update transitions (`PENDING_SYNC` -> `SYNCED`).
+- [ ] **Worker Verification Test:**
+  - [ ] Write `SyncReportWorkerTest` using `WorkManagerTestInitHelper` to verify background task execution under `NetworkType.CONNECTED` constraint.

@@ -22,6 +22,7 @@ import com.didik.canvassku.data.remote.AuthEffect
 import com.didik.canvassku.data.remote.AuthEventBus
 import com.didik.canvassku.presentation.screens.auth.LoginScreen
 import com.didik.canvassku.presentation.screens.home.HomeScreen
+import com.didik.canvassku.presentation.screens.visit_form.VisitFormScreen
 import org.koin.compose.koinInject
 
 @Composable
@@ -83,7 +84,10 @@ fun CanvasskuNavHost(startRoute: NavRoute) {
                     )
                 }
                 entry<NavRoute.VisitForm> { key ->
-                    RoutePlaceholder(label = "VisitForm:${key.storeId}")
+                    VisitFormScreen(
+                        storeId = key.storeId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                    )
                 }
                 entry<NavRoute.VisitDetail> { key ->
                     RoutePlaceholder(label = "VisitDetail:${key.reportId}")

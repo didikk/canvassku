@@ -103,8 +103,6 @@ class TokenAuthenticator(
                     else -> RefreshOutcome.TransientFailure
                 }
             }
-        } catch (_: IOException) {
-            RefreshOutcome.TransientFailure
         } catch (_: Exception) {
             RefreshOutcome.TransientFailure
         }

@@ -42,7 +42,7 @@ When an API request returns **HTTP 401 Unauthorized**:
 
 ### Worker Execution Workflow
 
-1. **Query Pending Data:** Query `VisitReportDao` for all records where `syncStatus == "PENDING_SYNC"`.
+1. **Query Pending Data:** Query `VisitReportDao` for records where `syncStatus` is `"PENDING_SYNC"` or `"FAILED"` (failed rows stay eligible for automatic / manual retry).
 2. **Verify / Refresh Token:**
    - Read active JWT from `DataStore`.
    - If expired, execute silent token refresh before sending payloads.

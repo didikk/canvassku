@@ -15,9 +15,3 @@ data class VisitReportEntity(
     val syncStatus: String,
     val createdAt: Long = System.currentTimeMillis(),
 )
-
-object SyncStatus {
-    const val PENDING_SYNC = "PENDING_SYNC"
-    const val SYNCED = "SYNCED"
-    const val FAILED = "FAILED"
-}

@@ -6,6 +6,7 @@ import com.didik.canvassku.domain.model.StoreListItem
 import com.didik.canvassku.domain.model.StoreVisitStatus
 import com.didik.canvassku.domain.repository.AuthRepository
 import com.didik.canvassku.domain.repository.StoreRepository
+import com.didik.canvassku.domain.repository.VisitRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ import java.io.IOException
 class HomeViewModel(
     private val storeRepository: StoreRepository,
     private val authRepository: AuthRepository,
+    private val visitRepository: VisitRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeState())
     val uiState: StateFlow<HomeState> = _uiState.asStateFlow()
@@ -71,10 +73,10 @@ class HomeViewModel(
                 _effect.send(HomeEffect.ShowMessage("Tidak ada laporan tertunda."))
                 return@launch
             }
-            // Report upload worker lands in Phase 4; keep the CTA honest until then.
+            visitRepository.enqueuePendingSync()
             _effect.send(
                 HomeEffect.ShowMessage(
-                    "Ada $pending laporan tertunda. Pengiriman otomatis aktif setelah form kunjungan.",
+                    "Mengirim $pending laporan tertunda saat jaringan tersedia.",
                 ),
             )
         }

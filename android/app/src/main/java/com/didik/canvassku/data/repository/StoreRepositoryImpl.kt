@@ -5,15 +5,16 @@ import com.didik.canvassku.data.local.db.AppDatabase
 import com.didik.canvassku.data.local.db.StoreDao
 import com.didik.canvassku.data.local.db.VisitReportDao
 import com.didik.canvassku.data.local.entity.StoreEntity
-import com.didik.canvassku.data.local.entity.SyncStatus
 import com.didik.canvassku.data.local.entity.VisitReportEntity
 import com.didik.canvassku.data.remote.api.StrapiApi
 import com.didik.canvassku.domain.model.Store
 import com.didik.canvassku.domain.model.StoreListItem
 import com.didik.canvassku.domain.model.StoreVisitStatus
+import com.didik.canvassku.domain.model.SyncStatus
 import com.didik.canvassku.domain.repository.StoreRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Singleton
 
 @Singleton
@@ -23,6 +24,10 @@ class StoreRepositoryImpl(
     private val storeDao: StoreDao,
     private val visitReportDao: VisitReportDao,
 ) : StoreRepository {
+    override fun observeStore(storeId: String): Flow<Store?> {
+        return storeDao.observeById(storeId).map { entity -> entity?.toDomain() }
+    }
+
     override fun observeStoreListItems(): Flow<List<StoreListItem>> {
         return combine(
             storeDao.observeAll(),

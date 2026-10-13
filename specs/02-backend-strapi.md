@@ -30,4 +30,5 @@
 - **Public Role:** Allowed `auth.local` and `auth.refreshToken`
 - **Authenticated Role:**
   - `stores`: `find`, `findOne`
-  - `visit-reports`: `create`, `find`, `findOne`
+  - `visit-reports`: `create`, `find`, `findOne` (`find` is required for post-login Room seed via `GET /api/visit-reports?populate=*`)
+  - `upload` (`plugin::upload.content-api.upload`): required so the app can upload photos before creating a visit report (Strapi 5 no longer accepts `files.*` on entry create)

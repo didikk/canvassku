@@ -28,8 +28,9 @@
 - [x] Implement OkHttp `AuthInterceptor` and `Authenticator` for attaching `Bearer` tokens, handling silent token refresh on 401 response, and emitting `AuthEffect.ForceReLogin` channel effect on refresh failure.
 - [x] Implement `LoginScreen` UI matching `@specs/DESIGN.md` and `LoginViewModel` inside `presentation/screens/auth/` (MVVM with StateFlow backing fields, Channel effects, and `LoginState`).
 - [x] Implement initial store master data fetch (`GET /api/stores`) post-login to seed Room DB.
+- [x] Implement visit-report pull (`GET /api/visit-reports?populate=*`) post-login to seed Room as `SYNCED`; skip pull when `ForceReLogin` flag is set in DataStore; detail shows remote photo URL when no local file.
 - [x] Implement `HomeScreen` UI inside `presentation/screens/home/` displaying stores directly from Room DB (`Flow<List<Store>>`).
-- [x] Add TopAppBar with manual sync trigger button and logout action.
+- [x] Add TopAppBar with manual sync trigger button and logout action (confirm dialog; logout clears Room + cancels pending sync work).
 
 ## Phase 4: Visit Form & Offline Engine
 
@@ -41,9 +42,9 @@
 
 ## Phase 5: Read-Only Visit Detail & Edge Case Verification
 
-- [ ] Implement `VisitDetailScreen` UI inside `presentation/screens/visit_detail/` for viewing saved/synced report details with status `AssistChip` (`PENDING_SYNC`, `SYNCED`, `FAILED`).
-- [ ] Test offline token bypass: Create a visit report offline with an expired JWT (> 5m) and verify instant save to Room DB without blocking the user.
-- [ ] Test auto-sync recovery: Create report offline, then reconnect network and verify `SyncReportWorker` auto-uploads to Strapi.
+- [x] Implement `VisitDetailScreen` UI inside `presentation/screens/visit_detail/` for viewing saved/synced report details with status `AssistChip` (`PENDING_SYNC`, `SYNCED`, `FAILED`).
+- [x] Test offline token bypass: Create a visit report offline with an expired JWT (> 5m) and verify instant save to Room DB without blocking the user.
+- [x] Test auto-sync recovery: Create report offline, then reconnect network and verify `SyncReportWorker` auto-uploads to Strapi.
 
 ## Phase 6: Automated Testing & Verification
 

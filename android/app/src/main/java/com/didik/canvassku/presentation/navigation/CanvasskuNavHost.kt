@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +22,7 @@ import com.didik.canvassku.data.remote.AuthEffect
 import com.didik.canvassku.data.remote.AuthEventBus
 import com.didik.canvassku.presentation.screens.auth.LoginScreen
 import com.didik.canvassku.presentation.screens.home.HomeScreen
+import com.didik.canvassku.presentation.screens.visit_detail.VisitDetailScreen
 import com.didik.canvassku.presentation.screens.visit_form.VisitFormScreen
 import org.koin.compose.koinInject
 
@@ -94,7 +94,10 @@ fun CanvasskuNavHost(startRoute: NavRoute) {
                     )
                 }
                 entry<NavRoute.VisitDetail> { key ->
-                    RoutePlaceholder(label = "VisitDetail:${key.reportId}")
+                    VisitDetailScreen(
+                        reportId = key.reportId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                    )
                 }
             },
         )
@@ -102,15 +105,5 @@ fun CanvasskuNavHost(startRoute: NavRoute) {
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
-    }
-}
-
-@Composable
-private fun RoutePlaceholder(label: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = "[SCREEN] $label")
     }
 }

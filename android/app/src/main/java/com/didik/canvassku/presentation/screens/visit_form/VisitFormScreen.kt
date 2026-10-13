@@ -182,7 +182,9 @@ fun VisitFormScreen(
                         )
                     }
                 }
-                is VisitFormEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+                is VisitFormEffect.ShowMessage -> {
+                    scope.launch { snackbarHostState.showSnackbar(effect.message) }
+                }
             }
         }
     }
@@ -285,7 +287,7 @@ fun VisitFormScreen(
                             .fillMaxWidth()
                             .heightIn(min = 140.dp),
                         placeholder = {
-                            Text("Tuliskan detail produk dan jumlah pesanan...")
+                            Text("Contoh: 5 Karung Beras Premium 25kg")
                         },
                         enabled = !isSaving,
                         shape = RoundedCornerShape(12.dp),

@@ -1,5 +1,6 @@
 package com.didik.canvassku.presentation.screens.home.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.didik.canvassku.core.design.OnPrimary
 import com.didik.canvassku.core.design.OnSecondaryContainer
 import com.didik.canvassku.core.design.OnSurfaceVariant
 import com.didik.canvassku.core.design.OnTertiaryContainer
@@ -40,7 +43,6 @@ import com.didik.canvassku.core.design.PrimaryContainer
 import com.didik.canvassku.core.design.Secondary
 import com.didik.canvassku.core.design.SecondaryContainer
 import com.didik.canvassku.core.design.SurfaceContainer
-import com.didik.canvassku.core.design.SurfaceContainerHigh
 import com.didik.canvassku.core.design.SurfaceContainerLowest
 import com.didik.canvassku.core.design.TertiaryFixed
 import com.didik.canvassku.domain.model.StoreListItem
@@ -149,28 +151,49 @@ fun StoreCard(
             }
         }
 
-        Button(
-            onClick = onActionClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(percent = 50),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = SurfaceContainerHigh,
-                contentColor = Primary,
-            ),
-        ) {
-            Text(
-                text = statusStyle.actionLabel,
-                style = MaterialTheme.typography.labelLarge,
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-            )
+        if (statusStyle.actionOutlined) {
+            OutlinedButton(
+                onClick = onActionClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(percent = 50),
+                border = BorderStroke(1.5.dp, PrimaryContainer),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = PrimaryContainer,
+                ),
+            ) {
+                StoreActionLabel(label = statusStyle.actionLabel)
+            }
+        } else {
+            Button(
+                onClick = onActionClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(percent = 50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = statusStyle.actionContainer,
+                    contentColor = statusStyle.actionContent,
+                ),
+            ) {
+                StoreActionLabel(label = statusStyle.actionLabel)
+            }
         }
     }
+}
+
+@Composable
+private fun StoreActionLabel(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelLarge,
+    )
+    Icon(
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+    )
 }
 
 private data class StoreStatusStyle(
@@ -182,6 +205,9 @@ private data class StoreStatusStyle(
     val iconTint: Color,
     val detailColor: Color,
     val actionLabel: String,
+    val actionContainer: Color = Color.Unspecified,
+    val actionContent: Color = Color.Unspecified,
+    val actionOutlined: Boolean = false,
 )
 
 private fun StoreListItem.statusDetailText(): String? {
@@ -209,6 +235,8 @@ private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
             iconTint = Primary,
             detailColor = OnSurfaceVariant,
             actionLabel = "Mulai Kunjungan",
+            actionContainer = PrimaryContainer,
+            actionContent = OnPrimary,
         )
         StoreVisitStatus.PENDING_SYNC -> StoreStatusStyle(
             label = "Menunggu Kirim",
@@ -219,6 +247,7 @@ private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
             iconTint = OnTertiaryFixedVariant,
             detailColor = OnTertiaryContainer,
             actionLabel = "Lihat Detail",
+            actionOutlined = true,
         )
         StoreVisitStatus.SYNCED -> StoreStatusStyle(
             label = "Tersinkronisasi",
@@ -229,6 +258,7 @@ private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
             iconTint = Secondary,
             detailColor = Secondary,
             actionLabel = "Lihat Detail",
+            actionOutlined = true,
         )
     }
 }

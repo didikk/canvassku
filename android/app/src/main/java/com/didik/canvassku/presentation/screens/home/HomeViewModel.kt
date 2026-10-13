@@ -6,7 +6,7 @@ import com.didik.canvassku.domain.model.StoreListItem
 import com.didik.canvassku.domain.model.StoreVisitStatus
 import com.didik.canvassku.domain.repository.AuthRepository
 import com.didik.canvassku.domain.repository.StoreRepository
-import com.didik.canvassku.domain.repository.VisitRepository
+import com.didik.canvassku.domain.repository.SyncScheduler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +22,7 @@ import java.io.IOException
 class HomeViewModel(
     private val storeRepository: StoreRepository,
     private val authRepository: AuthRepository,
-    private val visitRepository: VisitRepository,
+    private val syncScheduler: SyncScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeState())
     val uiState: StateFlow<HomeState> = _uiState.asStateFlow()
@@ -41,6 +41,11 @@ class HomeViewModel(
                 _uiState.update { it.copy(pendingReportCount = count) }
             }
         }
+        viewModelScope.launch {
+            syncScheduler.observeIsSyncing().collect { syncing ->
+                _uiState.update { it.copy(isReportSyncing = syncing) }
+            }
+        }
     }
 
     fun onFilterSelected(filter: StoreFilter) {
@@ -49,10 +54,10 @@ class HomeViewModel(
 
     fun onSyncClick() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSyncing = true) }
+            _uiState.update { it.copy(isStoreSyncing = true) }
             storeRepository.syncStores()
                 .onSuccess {
-                    _uiState.update { it.copy(isSyncing = false) }
+                    _uiState.update { it.copy(isStoreSyncing = false) }
                     _effect.send(HomeEffect.ShowMessage("Data toko diperbarui."))
                 }
                 .onFailure { error ->
@@ -60,7 +65,7 @@ class HomeViewModel(
                         is IOException -> "Sinkronisasi gagal. Periksa jaringan, data lokal tetap ditampilkan."
                         else -> "Sinkronisasi gagal. Coba lagi."
                     }
-                    _uiState.update { it.copy(isSyncing = false) }
+                    _uiState.update { it.copy(isStoreSyncing = false) }
                     _effect.send(HomeEffect.ShowMessage(message))
                 }
         }
@@ -73,7 +78,7 @@ class HomeViewModel(
                 _effect.send(HomeEffect.ShowMessage("Tidak ada laporan tertunda."))
                 return@launch
             }
-            visitRepository.enqueuePendingSync()
+            syncScheduler.enqueuePendingSync()
             _effect.send(
                 HomeEffect.ShowMessage(
                     "Mengirim $pending laporan tertunda saat jaringan tersedia.",
@@ -103,7 +108,16 @@ class HomeViewModel(
     }
 
     fun onLogoutClick() {
+        _uiState.update { it.copy(showLogoutConfirm = true) }
+    }
+
+    fun onLogoutDismiss() {
+        _uiState.update { it.copy(showLogoutConfirm = false) }
+    }
+
+    fun onLogoutConfirm() {
         viewModelScope.launch {
+            _uiState.update { it.copy(showLogoutConfirm = false) }
             authRepository.logout()
             _effect.send(HomeEffect.LoggedOut)
         }

@@ -124,7 +124,7 @@ class VisitFormViewModel(
                 orderNotes = state.orderNotes,
                 localImagePath = imagePath,
             ).onSuccess {
-                _effect.send(VisitFormEffect.ShowMessage("Laporan tersimpan lokal. Menunggu sinkronisasi."))
+                // Navigate first — do not wait for snackbar (it blocked home return).
                 _effect.send(VisitFormEffect.NavigateBack)
             }.onFailure { error ->
                 _uiState.update {

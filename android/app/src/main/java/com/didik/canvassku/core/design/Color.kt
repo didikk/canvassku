@@ -7,6 +7,8 @@ val Primary = Color(0xFF002045)
 val OnPrimary = Color(0xFFFFFFFF)
 val PrimaryContainer = Color(0xFF1A365D)
 val OnPrimaryContainer = Color(0xFF86A0CD)
+val PrimaryFixed = Color(0xFFD6E3FF)
+val OnPrimaryFixedVariant = Color(0xFF2D476F)
 val InversePrimary = Color(0xFFADC7F7)
 val SurfaceTint = Color(0xFF455F88)
 

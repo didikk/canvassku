@@ -11,6 +11,8 @@ const AUTHENTICATED_ACTIONS = [
   'api::visit-report.visit-report.create',
   'api::visit-report.visit-report.find',
   'api::visit-report.visit-report.findOne',
+  // Strapi 5: media must be uploaded first, then linked on create.
+  'plugin::upload.content-api.upload',
 ] as const;
 
 const SEED_STORES = [

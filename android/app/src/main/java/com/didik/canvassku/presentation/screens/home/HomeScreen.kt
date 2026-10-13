@@ -2,20 +2,20 @@ package com.didik.canvassku.presentation.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -32,15 +32,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didik.canvassku.core.design.Background
-import com.didik.canvassku.core.design.OnTertiaryContainer
 import com.didik.canvassku.core.design.OnSurfaceVariant
 import com.didik.canvassku.core.design.Primary
 import com.didik.canvassku.core.design.PrimaryContainer
 import com.didik.canvassku.core.design.SurfaceContainerLowest
 import com.didik.canvassku.presentation.screens.home.components.EmptyStoresState
+import com.didik.canvassku.presentation.screens.home.components.LogoutConfirmDialog
 import com.didik.canvassku.presentation.screens.home.components.PendingSyncBanner
 import com.didik.canvassku.presentation.screens.home.components.StoreCard
 import com.didik.canvassku.presentation.screens.home.components.StoreFilterChips
+import com.didik.canvassku.presentation.screens.home.components.SyncActionIcon
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,51 +66,58 @@ fun HomeScreen(
         }
     }
 
+    if (uiState.showLogoutConfirm) {
+        LogoutConfirmDialog(
+            pendingReportCount = uiState.pendingReportCount,
+            onConfirm = viewModel::onLogoutConfirm,
+            onDismiss = viewModel::onLogoutDismiss,
+        )
+    }
+
     Scaffold(
         containerColor = Background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Daftar Toko",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Primary,
-                    )
-                },
-                actions = {
-                    IconButton(
-                        onClick = viewModel::onSyncClick,
-                        enabled = !uiState.isSyncing,
-                    ) {
-                        if (uiState.isSyncing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = OnTertiaryContainer,
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.Sync,
-                                contentDescription = "Sinkronisasi toko",
-                                tint = OnTertiaryContainer,
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Daftar Toko",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Primary,
+                        )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = viewModel::onSyncClick,
+                            enabled = !uiState.isSyncing,
+                        ) {
+                            SyncActionIcon(
+                                hasPending = uiState.pendingReportCount > 0,
                             )
                         }
-                    }
-                    IconButton(onClick = viewModel::onLogoutClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Keluar",
-                            tint = OnSurfaceVariant,
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SurfaceContainerLowest,
-                    titleContentColor = Primary,
-                    actionIconContentColor = OnSurfaceVariant,
-                ),
-            )
+                        IconButton(onClick = viewModel::onLogoutClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "Keluar",
+                                tint = OnSurfaceVariant,
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = SurfaceContainerLowest,
+                        titleContentColor = Primary,
+                        actionIconContentColor = OnSurfaceVariant,
+                    ),
+                )
+                if (uiState.isSyncing) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = PrimaryContainer,
+                        trackColor = PrimaryContainer.copy(alpha = 0.15f),
+                    )
+                }
+            }
         },
     ) { innerPadding ->
         when {

@@ -109,6 +109,7 @@ class TokenAuthenticator(
     }
 
     private suspend fun forceReLogin() {
+        authPreferences.markSkipVisitSyncOnNextLogin()
         authPreferences.clearSession()
         authEventBus.emit(AuthEffect.ForceReLogin)
     }

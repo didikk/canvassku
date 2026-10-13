@@ -32,6 +32,12 @@ interface VisitReportDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(report: VisitReportEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(reports: List<VisitReportEntity>)
+
+    @Query("DELETE FROM visit_reports")
+    suspend fun clearAll()
+
     @Query("UPDATE visit_reports SET syncStatus = :status WHERE id = :id")
     suspend fun updateSyncStatus(id: String, status: String)
 }

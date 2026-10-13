@@ -3,6 +3,7 @@ package com.didik.canvassku.data.local.preferences
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -45,12 +46,29 @@ class AuthPreferences(context: Context) {
         dataStore.edit { prefs ->
             prefs.remove(KEY_JWT_TOKEN)
             prefs.remove(KEY_REFRESH_TOKEN)
+            // Keep KEY_SKIP_VISIT_SYNC_ON_LOGIN — survives ForceReLogin process death.
         }
         cachedJwtToken = null
+    }
+
+    suspend fun markSkipVisitSyncOnNextLogin() {
+        dataStore.edit { prefs ->
+            prefs[KEY_SKIP_VISIT_SYNC_ON_LOGIN] = true
+        }
+    }
+
+    suspend fun isSkipVisitSyncOnNextLogin(): Boolean =
+        dataStore.data.map { it[KEY_SKIP_VISIT_SYNC_ON_LOGIN] == true }.first()
+
+    suspend fun clearSkipVisitSyncOnNextLogin() {
+        dataStore.edit { prefs ->
+            prefs.remove(KEY_SKIP_VISIT_SYNC_ON_LOGIN)
+        }
     }
 
     private companion object {
         val KEY_JWT_TOKEN = stringPreferencesKey("jwt_token")
         val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        val KEY_SKIP_VISIT_SYNC_ON_LOGIN = booleanPreferencesKey("skip_visit_sync_on_login")
     }
 }

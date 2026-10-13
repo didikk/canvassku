@@ -2,6 +2,7 @@ package com.didik.canvassku.domain.usecase
 
 import com.didik.canvassku.domain.model.SyncStatus
 import com.didik.canvassku.domain.model.VisitReport
+import com.didik.canvassku.domain.repository.SyncScheduler
 import com.didik.canvassku.domain.repository.VisitRepository
 import org.koin.core.annotation.Factory
 import java.util.UUID
@@ -9,6 +10,7 @@ import java.util.UUID
 @Factory
 class SaveVisitReportUseCase(
     private val visitRepository: VisitRepository,
+    private val syncScheduler: SyncScheduler,
 ) {
     suspend operator fun invoke(
         storeId: String,
@@ -36,6 +38,8 @@ class SaveVisitReportUseCase(
             createdAt = System.currentTimeMillis(),
         )
 
-        return visitRepository.saveLocal(report).map { report }
+        return visitRepository.saveLocal(report)
+            .onSuccess { syncScheduler.enqueuePendingSync() }
+            .map { report }
     }
 }

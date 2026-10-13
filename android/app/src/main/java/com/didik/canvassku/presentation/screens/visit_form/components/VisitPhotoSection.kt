@@ -1,7 +1,5 @@
 package com.didik.canvassku.presentation.screens.visit_form.components
 
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -24,16 +22,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.didik.canvassku.core.design.BrandOutline
 import com.didik.canvassku.core.design.OnSurface
 import com.didik.canvassku.core.design.OnSurfaceVariant
@@ -41,6 +38,7 @@ import com.didik.canvassku.core.design.Primary
 import com.didik.canvassku.core.design.PrimaryContainer
 import com.didik.canvassku.core.design.SurfaceContainer
 import com.didik.canvassku.core.design.SurfaceContainerLowest
+import java.io.File
 
 @Composable
 fun VisitPhotoSection(
@@ -88,18 +86,7 @@ fun VisitPhotoSection(
                 .background(SurfaceContainer),
             contentAlignment = Alignment.Center,
         ) {
-            val preview = remember(localImagePath) {
-                localImagePath
-                    ?.let { BitmapFactory.decodeFile(it)?.asImageBitmap() }
-            }
-            if (preview != null) {
-                Image(
-                    bitmap = preview,
-                    contentDescription = "Pratinjau foto kunjungan",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
-            } else {
+            if (localImagePath.isNullOrBlank()) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -115,9 +102,16 @@ fun VisitPhotoSection(
                         text = "Belum ada foto. Ambil foto etalase atau bukti kunjungan.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = OnSurfaceVariant,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
+            } else {
+                AsyncImage(
+                    model = File(localImagePath),
+                    contentDescription = "Pratinjau foto kunjungan",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
             }
         }
 

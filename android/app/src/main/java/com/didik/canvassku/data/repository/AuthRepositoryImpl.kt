@@ -1,16 +1,22 @@
 package com.didik.canvassku.data.repository
 
+import com.didik.canvassku.data.local.db.AppDatabase
 import com.didik.canvassku.data.local.preferences.AuthPreferences
 import com.didik.canvassku.data.remote.api.StrapiApi
 import com.didik.canvassku.data.remote.dto.LoginRequestDto
 import com.didik.canvassku.domain.model.AuthSession
 import com.didik.canvassku.domain.repository.AuthRepository
+import com.didik.canvassku.domain.repository.SyncScheduler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Singleton
 
 @Singleton
 class AuthRepositoryImpl(
     private val api: StrapiApi,
     private val authPreferences: AuthPreferences,
+    private val appDatabase: AppDatabase,
+    private val syncScheduler: SyncScheduler,
 ) : AuthRepository {
     override suspend fun login(identifier: String, password: String): Result<AuthSession> {
         return try {
@@ -31,6 +37,11 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
+        syncScheduler.cancelPendingSync()
+        withContext(Dispatchers.IO) {
+            appDatabase.clearAllTables()
+        }
+        authPreferences.clearSkipVisitSyncOnNextLogin()
         authPreferences.clearSession()
     }
 
@@ -38,5 +49,16 @@ class AuthRepositoryImpl(
         val jwt = authPreferences.currentJwtToken()
         val refresh = authPreferences.currentRefreshToken()
         return !jwt.isNullOrBlank() && !refresh.isNullOrBlank()
+    }
+
+    override suspend fun markSkipVisitSyncOnNextLogin() {
+        authPreferences.markSkipVisitSyncOnNextLogin()
+    }
+
+    override suspend fun isSkipVisitSyncOnNextLogin(): Boolean =
+        authPreferences.isSkipVisitSyncOnNextLogin()
+
+    override suspend fun clearSkipVisitSyncOnNextLogin() {
+        authPreferences.clearSkipVisitSyncOnNextLogin()
     }
 }

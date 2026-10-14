@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import java.io.IOException
 
 @KoinViewModel
 class HomeViewModel(
@@ -58,25 +57,6 @@ class HomeViewModel(
 
     fun onFilterSelected(filter: StoreFilter) {
         _uiState.update { it.copy(filter = filter) }
-    }
-
-    fun onSyncClick() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isStoreSyncing = true) }
-            storeRepository.syncStores()
-                .onSuccess {
-                    _uiState.update { it.copy(isStoreSyncing = false) }
-                    _effect.send(HomeEffect.ShowMessage("Data toko diperbarui."))
-                }
-                .onFailure { error ->
-                    val message = when (error) {
-                        is IOException -> "Sinkronisasi gagal. Periksa jaringan, data lokal tetap ditampilkan."
-                        else -> "Sinkronisasi gagal. Coba lagi."
-                    }
-                    _uiState.update { it.copy(isStoreSyncing = false) }
-                    _effect.send(HomeEffect.ShowMessage(message))
-                }
-        }
     }
 
     fun onSendPendingClick() {

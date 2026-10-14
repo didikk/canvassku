@@ -14,12 +14,9 @@ data class HomeState(
     val stores: List<StoreListItem> = emptyList(),
     val filter: StoreFilter = StoreFilter.ALL,
     val pendingReportCount: Int = 0,
-    val isStoreSyncing: Boolean = false,
     val isReportSyncing: Boolean = false,
     val showLogoutConfirm: Boolean = false,
 ) {
-    val isSyncing: Boolean get() = isStoreSyncing || isReportSyncing
-
     val filteredStores: List<StoreListItem>
         get() = when (filter) {
             StoreFilter.ALL -> stores

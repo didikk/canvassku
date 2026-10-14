@@ -1,7 +1,6 @@
 package com.didik.canvassku.presentation.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +38,6 @@ import com.didik.canvassku.presentation.screens.home.components.LogoutConfirmDia
 import com.didik.canvassku.presentation.screens.home.components.PendingSyncBanner
 import com.didik.canvassku.presentation.screens.home.components.StoreCard
 import com.didik.canvassku.presentation.screens.home.components.StoreFilterChips
-import com.didik.canvassku.presentation.screens.home.components.SyncActionIcon
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,14 +84,6 @@ fun HomeScreen(
                         )
                     },
                     actions = {
-                        IconButton(
-                            onClick = viewModel::onSyncClick,
-                            enabled = !uiState.isSyncing,
-                        ) {
-                            SyncActionIcon(
-                                hasPending = uiState.pendingReportCount > 0,
-                            )
-                        }
                         IconButton(onClick = viewModel::onLogoutClick) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Logout,
@@ -110,7 +98,7 @@ fun HomeScreen(
                         actionIconContentColor = OnSurfaceVariant,
                     ),
                 )
-                if (uiState.isSyncing) {
+                if (uiState.isReportSyncing) {
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                         color = PrimaryContainer,
@@ -120,65 +108,50 @@ fun HomeScreen(
             }
         },
     ) { innerPadding ->
-        when {
-            uiState.stores.isEmpty() && uiState.isSyncing -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = PrimaryContainer)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            if (uiState.pendingReportCount > 0) {
+                item(key = "pending-banner") {
+                    PendingSyncBanner(
+                        pendingCount = uiState.pendingReportCount,
+                        isSending = uiState.isReportSyncing,
+                        onSendNowClick = viewModel::onSendPendingClick,
+                    )
                 }
             }
 
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    if (uiState.pendingReportCount > 0) {
-                        item(key = "pending-banner") {
-                            PendingSyncBanner(
-                                pendingCount = uiState.pendingReportCount,
-                                isSending = uiState.isReportSyncing,
-                                onSendNowClick = viewModel::onSendPendingClick,
-                            )
-                        }
-                    }
+            item(key = "filters") {
+                StoreFilterChips(
+                    selected = uiState.filter,
+                    allCount = uiState.allCount,
+                    notVisitedCount = uiState.notVisitedCount,
+                    pendingSyncCount = uiState.pendingSyncCount,
+                    syncedCount = uiState.syncedCount,
+                    onSelected = viewModel::onFilterSelected,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
-                    item(key = "filters") {
-                        StoreFilterChips(
-                            selected = uiState.filter,
-                            allCount = uiState.allCount,
-                            notVisitedCount = uiState.notVisitedCount,
-                            pendingSyncCount = uiState.pendingSyncCount,
-                            syncedCount = uiState.syncedCount,
-                            onSelected = viewModel::onFilterSelected,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-
-                    if (uiState.filteredStores.isEmpty()) {
-                        item(key = "empty") {
-                            EmptyStoresState(
-                                hasStores = uiState.stores.isNotEmpty(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 48.dp, horizontal = 24.dp),
-                            )
-                        }
-                    } else {
-                        items(uiState.filteredStores, key = { it.store.id }) { item ->
-                            StoreCard(
-                                item = item,
-                                onActionClick = { viewModel.onStoreActionClick(item) },
-                            )
-                        }
-                    }
+            if (uiState.filteredStores.isEmpty()) {
+                item(key = "empty") {
+                    EmptyStoresState(
+                        hasStores = uiState.stores.isNotEmpty(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp, horizontal = 24.dp),
+                    )
+                }
+            } else {
+                items(uiState.filteredStores, key = { it.store.id }) { item ->
+                    StoreCard(
+                        item = item,
+                        onActionClick = { viewModel.onStoreActionClick(item) },
+                    )
                 }
             }
         }

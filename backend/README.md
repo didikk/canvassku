@@ -1,61 +1,96 @@
-# 🚀 Getting started with Strapi
+# Canvassku Backend (Strapi)
 
-Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.
+Strapi 5 CMS for Canvassku, using SQLite (`better-sqlite3`) for local development. The Android app talks to the Content API for auth, stores, visit reports, and media upload.
 
-### `develop`
+## Requirements
 
-Start your Strapi application with autoReload enabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-develop)
+- Node.js 20+ (see `package.json` `engines`)
+- npm 6+
 
-```
+## Quick Start
+
+```bash
+cd backend
+npm install
 npm run develop
-# or
-yarn develop
 ```
 
-### `start`
+| URL | Purpose |
+| --- | --- |
+| [http://localhost:1337/admin](http://localhost:1337/admin) | Admin panel |
+| `http://localhost:1337/api` | Content API |
 
-Start your Strapi application with autoReload disabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-start)
+Other scripts:
 
-```
-npm run start
-# or
-yarn start
-```
-
-### `build`
-
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
-
-```
-npm run build
-# or
-yarn build
+```bash
+npm run build    # build admin panel
+npm run start    # run without auto-reload
 ```
 
-## ⚙️ Deployment
+## Automated Seeding (`src/index.ts`)
 
-Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
+On `npm run develop`, `bootstrap()` in `src/index.ts` runs idempotent setup so a fresh clone works without committing local SQLite files:
 
-```
-yarn strapi deploy
-```
+1. Enable Public permissions for local login and token refresh.
+2. Enable Authenticated permissions for stores, visit-reports, and upload.
+3. Create Strapi admin `admin@mail.test` / `admin123!` if missing.
+4. Create app user `budi` (`budi@mail.test` / `sales123!`) in the Authenticated role if missing.
+5. Seed five dummy stores when the `stores` collection is empty.
 
-## 📚 Learn more
+Re-running bootstrap skips rows that already exist (matched by email or existing store count).
 
-- [Resource center](https://strapi.io/resource-center) - Strapi resource center.
-- [Strapi documentation](https://docs.strapi.io) - Official Strapi documentation.
-- [Strapi tutorials](https://strapi.io/tutorials) - List of tutorials made by the core team and the community.
-- [Strapi blog](https://strapi.io/blog) - Official Strapi blog containing articles made by the Strapi team and the community.
-- [Changelog](https://strapi.io/changelog) - Find out about the Strapi product updates, new features and general improvements.
+### Seed credentials
 
-Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/strapi). Your feedback and contributions are welcome!
+| Role | Identifier | Password |
+| --- | --- | --- |
+| Strapi Admin | `admin@mail.test` | `admin123!` |
+| App user | `budi@mail.test` (username `budi`) | `sales123!` |
 
-## ✨ Community
+## Schema Definitions
 
-- [Discord](https://discord.strapi.io) - Come chat with the Strapi community including the core team.
-- [Forum](https://forum.strapi.io/) - Place to discuss, ask questions and find answers, show your Strapi project and get feedback or just talk with other Community members.
-- [Awesome Strapi](https://github.com/strapi/awesome-strapi) - A curated list of awesome things related to Strapi.
+### `stores`
 
----
+| Field | Type | Notes |
+| --- | --- | --- |
+| `name` | Short text | Required |
+| `address` | Long text | Optional |
+| `owner_name` | Short text | Optional |
 
-<sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
+### `visit-reports`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `store` | Relation (Has One → `stores`) | Required |
+| `latitude` | Decimal | Required |
+| `longitude` | Decimal | Required |
+| `order_notes` | Long text | Required |
+| `photo` | Media (single image) | Required; upload via `/api/upload` first (Strapi 5) |
+
+Schemas live under `src/api/*/content-types/*/schema.json`.
+
+## JWT Configuration
+
+`config/plugins.ts` configures `users-permissions` with refresh-token session management and a short access token lifetime for client testing:
+
+- `jwt.expiresIn: '5m'`
+- `sessions.accessTokenLifespan: 300` seconds (5 minutes)
+
+The Android client relies on this short TTL to exercise silent refresh through OkHttp `TokenAuthenticator`. Refresh tokens use longer lifespans (see the same config file).
+
+## Auth Endpoints Used by the App
+
+| Method | Path | Role |
+| --- | --- | --- |
+| `POST` | `/api/auth/local` | Login |
+| `POST` | `/api/auth/refresh` | Silent token refresh |
+| `GET` | `/api/stores` | Post-login store seed |
+| `GET` | `/api/visit-reports?populate=*` | Post-login visit pull (when allowed) |
+| `POST` | `/api/upload` | Photo upload before report create |
+| `POST` | `/api/visit-reports` | Create synced visit report |
+
+## Related Docs
+
+- [Root README](../README.md)
+- [Development Workflow](../docs/DEVELOPMENT_WORKFLOW.md)
+- [Android README](../android/README.md)
+- Spec: [`../specs/02-backend-strapi.md`](../specs/02-backend-strapi.md)

@@ -16,7 +16,7 @@ Implementation started from modular specs in [`specs/`](../specs/), not from ad-
 | `06-tasks.md` | Phased checklist from Strapi setup through automated tests |
 | `DESIGN.md` | Material 3 color, type, and component tokens |
 
-Those files defined system boundaries before coding: Room owns readable state, Strapi owns remote persistence, and the sync worker bridges the gap without blocking the visit form. Architecture details (Koin, Clean Architecture, StateFlow rules) live in `specs/01-overview-and-architecture.md`.
+Those files were the contract before coding started. Implementation and review had to match them.
 
 ## Design System
 
@@ -26,20 +26,20 @@ Microcopy stays in Bahasa Indonesia and favors operational wording (`Tersimpan L
 
 ## How Quality Is Enforced
 
-AI does not invent product rules. Specs lock architecture, storage, auth/sync, UI, and the phase checklist before implementation starts. Generation and review both have to match those files.
+AI does not invent product rules. Specs lock the product and engineering contract before implementation starts. Generation and review both have to match those files.
 
 Quality is checked in layers:
 
 1. Specs first  
-   Room as SSOT, JWT refresh, WorkManager sync, and screen state rules are written down. If a change conflicts with a spec, the spec or the change is wrong; there is no silent exception.
+   Rules are written down in `specs/` before code. If a change conflicts with a spec, the spec or the change is wrong; there is no silent exception.
 
 2. AI implementation against specs  
    Backend and Android are generated from the same contracts so API and client stay aligned. Freeform “just make it work” code is rejected when it breaks a written rule.
 
 3. AI code review after each phase  
    When a phase in `specs/06-tasks.md` finishes, AI review prompts are run against the specs to catch:
-   - Architecture leaks (UI talking past domain, or network writes skipping Room)
-   - Auth/sync edge cases from `03` and `04` (session-expired vs logout, skip visit pull flag, failed sync retry eligibility)
+   - Architecture leaks against the layer and SSOT rules in the specs
+   - Auth/sync edge cases called out in `03` and `04`
    - Drift from DESIGN.md tokens or pending-sync banner rules  
 
    Findings are fixed before the next phase starts.

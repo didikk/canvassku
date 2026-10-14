@@ -1,7 +1,6 @@
 package com.didik.canvassku.data.remote.interceptor
 
 import com.didik.canvassku.data.local.preferences.AuthPreferences
-import com.didik.canvassku.data.remote.AuthEffect
 import com.didik.canvassku.data.remote.AuthEventBus
 import com.didik.canvassku.data.remote.dto.RefreshRequestDto
 import com.didik.canvassku.data.remote.dto.RefreshResponseDto
@@ -111,7 +110,7 @@ class TokenAuthenticator(
     private suspend fun forceReLogin() {
         authPreferences.markSkipVisitSyncOnNextLogin()
         authPreferences.clearSession()
-        authEventBus.emit(AuthEffect.ForceReLogin)
+        authEventBus.emitSessionExpired()
     }
 
     private fun responseCount(response: Response): Int {

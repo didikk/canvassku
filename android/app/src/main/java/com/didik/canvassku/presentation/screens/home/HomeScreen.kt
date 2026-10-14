@@ -144,6 +144,7 @@ fun HomeScreen(
                         item(key = "pending-banner") {
                             PendingSyncBanner(
                                 pendingCount = uiState.pendingReportCount,
+                                isSending = uiState.isReportSyncing,
                                 onSendNowClick = viewModel::onSendPendingClick,
                             )
                         }

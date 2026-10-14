@@ -7,6 +7,6 @@ data class VisitReport(
     val longitude: Double,
     val orderNotes: String,
     val localImagePath: String,
-    val syncStatus: String,
+    val syncStatus: SyncStatus,
     val createdAt: Long,
 )

@@ -3,7 +3,7 @@ package com.didik.canvassku.presentation.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didik.canvassku.domain.model.StoreListItem
-import com.didik.canvassku.domain.model.StoreVisitStatus
+import com.didik.canvassku.domain.model.SyncStatus
 import com.didik.canvassku.domain.repository.AuthRepository
 import com.didik.canvassku.domain.repository.StoreRepository
 import com.didik.canvassku.domain.repository.SyncScheduler
@@ -30,6 +30,8 @@ class HomeViewModel(
     private val _effect = Channel<HomeEffect>(Channel.BUFFERED)
     val effect: Flow<HomeEffect> = _effect.receiveAsFlow()
 
+    private var suppressSyncCompleteMessage = false
+
     init {
         viewModelScope.launch {
             storeRepository.observeStoreListItems().collect { stores ->
@@ -37,7 +39,13 @@ class HomeViewModel(
             }
         }
         viewModelScope.launch {
+            var previousPending = -1
             storeRepository.observePendingReportCount().collect { count ->
+                if (previousPending > 0 && count == 0 && !suppressSyncCompleteMessage) {
+                    _effect.send(HomeEffect.ShowMessage("Laporan terkirim."))
+                }
+                suppressSyncCompleteMessage = false
+                previousPending = count
                 _uiState.update { it.copy(pendingReportCount = count) }
             }
         }
@@ -90,11 +98,12 @@ class HomeViewModel(
     fun onStoreActionClick(item: StoreListItem) {
         viewModelScope.launch {
             when (item.status) {
-                StoreVisitStatus.NOT_VISITED -> {
+                SyncStatus.NOT_VISITED -> {
                     _effect.send(HomeEffect.OpenVisitForm(item.store.id))
                 }
-                StoreVisitStatus.PENDING_SYNC,
-                StoreVisitStatus.SYNCED,
+                SyncStatus.PENDING_SYNC,
+                SyncStatus.SYNCED,
+                SyncStatus.FAILED,
                 -> {
                     val reportId = item.latestReportId
                     if (reportId != null) {
@@ -117,6 +126,7 @@ class HomeViewModel(
 
     fun onLogoutConfirm() {
         viewModelScope.launch {
+            suppressSyncCompleteMessage = true
             _uiState.update { it.copy(showLogoutConfirm = false) }
             authRepository.logout()
             _effect.send(HomeEffect.LoggedOut)

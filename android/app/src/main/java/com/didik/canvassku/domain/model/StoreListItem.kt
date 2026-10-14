@@ -1,14 +1,8 @@
 package com.didik.canvassku.domain.model
 
-enum class StoreVisitStatus {
-    NOT_VISITED,
-    PENDING_SYNC,
-    SYNCED,
-}
-
 data class StoreListItem(
     val store: Store,
-    val status: StoreVisitStatus,
+    val status: SyncStatus,
     val latestReportId: String? = null,
     val latestReportCreatedAt: Long? = null,
 )

@@ -4,7 +4,6 @@ import com.didik.canvassku.data.local.db.AppDatabase
 import com.didik.canvassku.data.local.preferences.AuthPreferences
 import com.didik.canvassku.data.remote.api.StrapiApi
 import com.didik.canvassku.data.remote.dto.LoginRequestDto
-import com.didik.canvassku.domain.model.AuthSession
 import com.didik.canvassku.domain.repository.AuthRepository
 import com.didik.canvassku.domain.repository.SyncScheduler
 import kotlinx.coroutines.Dispatchers
@@ -18,19 +17,14 @@ class AuthRepositoryImpl(
     private val appDatabase: AppDatabase,
     private val syncScheduler: SyncScheduler,
 ) : AuthRepository {
-    override suspend fun login(identifier: String, password: String): Result<AuthSession> {
+    override suspend fun login(identifier: String, password: String): Result<Unit> {
         return try {
             val response = api.login(LoginRequestDto(identifier = identifier, password = password))
             authPreferences.saveSession(
                 jwtToken = response.jwt,
                 refreshToken = response.refreshToken,
             )
-            Result.success(
-                AuthSession(
-                    jwtToken = response.jwt,
-                    refreshToken = response.refreshToken,
-                ),
-            )
+            Result.success(Unit)
         } catch (error: Exception) {
             Result.failure(error)
         }

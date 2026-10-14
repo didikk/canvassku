@@ -9,7 +9,6 @@ import com.didik.canvassku.data.local.entity.VisitReportEntity
 import com.didik.canvassku.data.remote.api.StrapiApi
 import com.didik.canvassku.domain.model.Store
 import com.didik.canvassku.domain.model.StoreListItem
-import com.didik.canvassku.domain.model.StoreVisitStatus
 import com.didik.canvassku.domain.model.SyncStatus
 import com.didik.canvassku.domain.repository.StoreRepository
 import kotlinx.coroutines.flow.Flow
@@ -74,11 +73,12 @@ class StoreRepositoryImpl(
         }
     }
 
-    private fun VisitReportEntity?.toVisitStatus(): StoreVisitStatus {
+    private fun VisitReportEntity?.toVisitStatus(): SyncStatus {
         return when {
-            this == null -> StoreVisitStatus.NOT_VISITED
-            syncStatus == SyncStatus.SYNCED -> StoreVisitStatus.SYNCED
-            else -> StoreVisitStatus.PENDING_SYNC
+            this == null -> SyncStatus.NOT_VISITED
+            syncStatus == SyncStatus.SYNCED -> SyncStatus.SYNCED
+            // FAILED counts as pending for home filters.
+            else -> SyncStatus.PENDING_SYNC
         }
     }
 

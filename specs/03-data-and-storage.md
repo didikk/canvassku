@@ -19,14 +19,24 @@ data class VisitReportEntity(
     val longitude: Double,
     val orderNotes: String,
     val localImagePath: String,
-    val syncStatus: String, // "PENDING_SYNC", "SYNCED", "FAILED"
+    val syncStatus: SyncStatus, // Room TypeConverter stores enum name
     val createdAt: Long = System.currentTimeMillis()
 )
+
+enum class SyncStatus {
+    NOT_VISITED,   // list UI only — never persisted on a visit_reports row
+    PENDING_SYNC,
+    SYNCED,
+    FAILED,
+}
 ```
+
+- Persist only `PENDING_SYNC` / `SYNCED` / `FAILED` on reports. Home store list derives status from the latest report (or `NOT_VISITED` when none); failed reports map to `PENDING_SYNC` for home filters.
 
 ## Local Storage Rules
 
 - Room DAOs: All read queries return Flow<List<T>> for reactive UI updates.
+- `AppDatabase` registers `Converters` for `SyncStatus` ↔ String (enum `.name`).
 - DataStore Preferences (AuthPreferences):
   - Stores jwt_token (String) and token_timestamp (Long).
   - Managed as a @Single Koin instance.
@@ -42,8 +52,8 @@ data class VisitReportEntity(
 - Pending / failed visit reports that were not uploaded are permanently lost after logout confirm.
 - Orphan local photo files under `filesDir` may remain (not required to delete in MVP).
 
-## ForceReLogin vs Logout
+## Session-expired re-login vs Logout
 
-- `AuthEffect.ForceReLogin` (refresh failure): clear **session tokens only**; set `skip_visit_sync_on_login` in DataStore. Room data stays so offline pending reports are not wiped.
+- Session expired (refresh failure → `AuthEventBus.emitSessionExpired()`): clear **session tokens only**; set `skip_visit_sync_on_login` in DataStore. Room data stays so offline pending reports are not wiped.
 - Explicit logout: wipe Room + cancel sync work + clear session + clear skip flag (see above).
 - Visit pull (`syncFromRemote`) runs only when skip flag is unset; it may replace the whole `visit_reports` table.

@@ -26,19 +26,20 @@
 
 - [x] Implement `installSplashScreen()` in `MainActivity` with `setKeepOnScreenCondition` bound to `AuthPreferences` initial check, setting start route directly to `HomeScreen` or `LoginScreen`.
 - [x] Implement Retrofit API interface (`StrapiApi`) using Kotlin `suspend` functions.
-- [x] Implement OkHttp `AuthInterceptor` and `Authenticator` for attaching `Bearer` tokens, handling silent token refresh on 401 response, and emitting `AuthEffect.ForceReLogin` channel effect on refresh failure.
+- [x] Implement OkHttp `AuthInterceptor` and `Authenticator` for attaching `Bearer` tokens, handling silent token refresh on 401 response, and emitting `AuthEventBus.sessionExpired` (`Channel<Unit>`) on refresh failure.
 - [x] Implement `LoginScreen` UI matching `@specs/DESIGN.md` and `LoginViewModel` inside `presentation/screens/auth/` (MVVM with StateFlow backing fields, Channel effects, and `LoginState`).
 - [x] Implement initial store master data fetch (`GET /api/stores`) post-login to seed Room DB.
-- [x] Implement visit-report pull (`GET /api/visit-reports?populate=*`) post-login to seed Room as `SYNCED`; skip pull when `ForceReLogin` flag is set in DataStore; detail shows remote photo URL when no local file.
+- [x] Implement visit-report pull (`GET /api/visit-reports?populate=*`) post-login to seed Room as `SYNCED`; skip pull when `skip_visit_sync_on_login` is set in DataStore; detail shows remote photo URL when no local file.
 - [x] Implement `HomeScreen` UI inside `presentation/screens/home/` displaying stores directly from Room DB (`Flow<List<Store>>`).
 - [x] Add TopAppBar with manual sync trigger button and logout action (confirm dialog; logout clears Room + cancels pending sync work).
+- [x] Home `PendingSyncBanner`: calm “Mengirim…” while report sync `RUNNING`; alarm “belum terkirim” + Kirim Sekarang when idle pending; snackbar “Laporan terkirim.” when pending hits 0 (suppressed on logout).
 
 ## Phase 4: Visit Form & Offline Engine
 
 - [x] Implement `FusedLocationProviderClient` wrapper for passive GPS locking in `core/util/`.
 - [x] Implement Camera launcher & local photo compression utility (`context.filesDir`).
 - [x] Implement `VisitFormScreen` UI inside `presentation/screens/visit_form/` with automatic location badge, photo preview, order notes field, and submit button.
-- [x] Implement `VisitFormViewModel` calling `SaveVisitReportUseCase` to persist reports directly to Room DB with `syncStatus = "PENDING_SYNC"`.
+- [x] Implement `VisitFormViewModel` calling `SaveVisitReportUseCase` to persist reports directly to Room DB with `syncStatus = PENDING_SYNC`, enqueue sync, and navigate Home without waiting for upload.
 - [x] Implement `SyncReportWorker` (`CoroutineWorker`) in `data/worker/` with `NetworkType.CONNECTED` constraint to query pending records, perform silent token refresh if needed, upload multipart payloads to Strapi, and update Room status (`SYNCED` / `FAILED`).
 
 ## Phase 5: Read-Only Visit Detail & Edge Case Verification
@@ -54,8 +55,8 @@
   - [ ] Write `AuthPreferences` test using in-memory DataStore to verify token persistence and clear session actions.
 - [ ] **Unit Tests (Domain / ViewModel):**
   - [ ] Write `VisitFormViewModelTest` verifying that saving a report triggers `SaveVisitReportUseCase` and transitions UI state to `Success`.
-  - [ ] Write `SaveVisitReportUseCaseTest` to verify that offline reports are saved to Room DB with `syncStatus = "PENDING_SYNC"`.
+  - [ ] Write `SaveVisitReportUseCaseTest` to verify that offline reports are saved to Room DB with `syncStatus = PENDING_SYNC`.
 - [ ] **Integration Tests (Room DB):**
-  - [ ] Write Room DAO in-memory database tests (`StoreDaoTest`, `VisitReportDaoTest`) verifying reactive `Flow` emissions and status update transitions (`PENDING_SYNC` -> `SYNCED`).
+  - [ ] Write Room DAO in-memory database tests (`StoreDaoTest`, `VisitReportDaoTest`) verifying reactive `Flow` emissions and status update transitions (`PENDING_SYNC` → `SYNCED`) via `SyncStatus` TypeConverter.
 - [ ] **Worker Verification Test:**
   - [ ] Write `SyncReportWorkerTest` using `WorkManagerTestInitHelper` to verify background task execution under `NetworkType.CONNECTED` constraint.

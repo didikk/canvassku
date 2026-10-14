@@ -28,7 +28,7 @@ import com.didik.canvassku.domain.model.SyncStatus
 
 @Composable
 fun VisitDetailStatusChip(
-    syncStatus: String,
+    syncStatus: SyncStatus,
     modifier: Modifier = Modifier,
 ) {
     val style = syncStatus.toChipStyle()
@@ -70,7 +70,7 @@ private data class StatusChipStyle(
     val content: Color,
 )
 
-private fun String.toChipStyle(): StatusChipStyle {
+private fun SyncStatus.toChipStyle(): StatusChipStyle {
     return when (this) {
         SyncStatus.SYNCED -> StatusChipStyle(
             label = "Tersinkronisasi",
@@ -84,7 +84,7 @@ private fun String.toChipStyle(): StatusChipStyle {
             container = ErrorContainer,
             content = OnErrorContainer,
         )
-        else -> StatusChipStyle(
+        SyncStatus.PENDING_SYNC, SyncStatus.NOT_VISITED -> StatusChipStyle(
             label = "Menunggu Sinkronisasi",
             icon = Icons.Filled.Sync,
             container = TertiaryFixed,

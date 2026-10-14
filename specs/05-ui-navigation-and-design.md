@@ -18,3 +18,18 @@
 - Extract any additional private/supporting `@Composable` functions out of the screen file:
   - **One** supporting composable: place it in its own file next to the screen (same package).
   - **More than one** supporting composable: place them under a `components/` subfolder in that screen package (e.g. `presentation/screens/home/components/`).
+
+## Home Pending-Sync Banner UX
+
+After visit submit: save Room → enqueue WorkManager → navigate Home immediately (offline-first; do not await upload on the form).
+
+`PendingSyncBanner` when `pendingReportCount > 0`:
+
+| Condition | UI |
+|-----------|-----|
+| `isReportSyncing == true` (WorkInfo `RUNNING`) | Calm copy: _"Mengirim laporan…"_ / _"Sedang dikirim ke server"_. Cloud-upload icon. **No** "Kirim Sekarang". |
+| `isReportSyncing == false` | Alarm copy: _"N Laporan belum terkirim"_ / _"Tersimpan di memori perangkat"_. SyncProblem icon + **Kirim Sekarang**. |
+
+Snackbar: when pending count transitions from `> 0` to `0`, show _"Laporan terkirim."_ Suppress that message on explicit logout (Room wipe must not look like a successful sync).
+
+Work waiting on network (`ENQUEUED` with `CONNECTED` constraint) is **not** syncing — keep the alarm banner so offline queue stays visible.

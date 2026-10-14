@@ -25,6 +25,7 @@ import com.didik.canvassku.core.design.OnSurface
 import com.didik.canvassku.core.design.OnSurfaceVariant
 import com.didik.canvassku.core.design.SurfaceContainerLowest
 import com.didik.canvassku.core.design.SurfaceTint
+import com.didik.canvassku.domain.model.SyncStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -33,7 +34,7 @@ import java.util.TimeZone
 @Composable
 fun VisitDetailHeaderCard(
     storeName: String,
-    syncStatus: String,
+    syncStatus: SyncStatus,
     createdAt: Long,
     modifier: Modifier = Modifier,
 ) {

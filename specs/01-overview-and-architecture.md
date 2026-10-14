@@ -47,13 +47,14 @@ com.didik.canvassku/
 │   ├── remote/
 │   │   ├── api/                        # StrapiApi (Retrofit with suspend functions)
 │   │   ├── dto/                        # LoginRequestDto, LoginResponseDto, VisitReportDto
-│   │   └── interceptor/                # AuthInterceptor, TokenAuthenticator (401 Refresh)
+│   │   ├── interceptor/                # AuthInterceptor, TokenAuthenticator (401 Refresh)
+│   │   └── AuthEventBus.kt             # Channel one-shot sessionExpired → force re-login
 │   ├── repository/                     # StoreRepositoryImpl, VisitRepositoryImpl, AuthRepositoryImpl
 │   └── worker/                         # SyncReportWorker (WorkManager background engine)
 ├── domain/
-│   ├── model/                          # Store, VisitReport, AuthSession
-│   ├── repository/                     # StoreRepository, VisitRepository, AuthRepository
-│   └── usecase/                        # SaveVisitReportUseCase (Only when multi-repo/validation needed)
+│   ├── model/                          # Store, VisitReport, SyncStatus, StoreListItem
+│   ├── repository/                     # StoreRepository, VisitRepository, AuthRepository, SyncScheduler
+│   └── usecase/                        # LoginUseCase, SaveVisitReportUseCase (multi-repo / validation)
 └── presentation/
     ├── navigation/                     # NavRoute contracts & Navigation3 Root NavHost
     └── screens/                        # Encapsulated Screen Features

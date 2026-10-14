@@ -2,6 +2,7 @@ package com.didik.canvassku.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.didik.canvassku.domain.model.SyncStatus
 import java.util.UUID
 
 @Entity(tableName = "visit_reports")
@@ -12,6 +13,6 @@ data class VisitReportEntity(
     val longitude: Double,
     val orderNotes: String,
     val localImagePath: String,
-    val syncStatus: String,
+    val syncStatus: SyncStatus,
     val createdAt: Long = System.currentTimeMillis(),
 )

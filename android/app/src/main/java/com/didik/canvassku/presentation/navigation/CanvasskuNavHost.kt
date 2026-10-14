@@ -18,7 +18,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.didik.canvassku.core.util.EnsureLocalNetworkPermission
-import com.didik.canvassku.data.remote.AuthEffect
 import com.didik.canvassku.data.remote.AuthEventBus
 import com.didik.canvassku.presentation.screens.auth.LoginScreen
 import com.didik.canvassku.presentation.screens.home.HomeScreen
@@ -37,15 +36,11 @@ fun CanvasskuNavHost(startRoute: NavRoute) {
     EnsureLocalNetworkPermission()
 
     LaunchedEffect(authEventBus) {
-        authEventBus.effects.collect { effect ->
-            when (effect) {
-                AuthEffect.ForceReLogin -> {
-                    sessionExpiredMessage = "Sesi Anda telah berakhir. Silakan login kembali."
-                    backStack.clear()
-                    backStack.add(NavRoute.Login)
-                    snackbarHostState.showSnackbar(sessionExpiredMessage!!)
-                }
-            }
+        authEventBus.sessionExpired.collect {
+            sessionExpiredMessage = "Sesi Anda telah berakhir. Silakan login kembali."
+            backStack.clear()
+            backStack.add(NavRoute.Login)
+            snackbarHostState.showSnackbar(sessionExpiredMessage!!)
         }
     }
 

@@ -1,6 +1,5 @@
 package com.didik.canvassku.domain.usecase
 
-import com.didik.canvassku.domain.model.AuthSession
 import com.didik.canvassku.domain.repository.AuthRepository
 import com.didik.canvassku.domain.repository.StoreRepository
 import com.didik.canvassku.domain.repository.VisitRepository
@@ -15,10 +14,10 @@ class LoginUseCase(
     suspend operator fun invoke(
         identifier: String,
         password: String,
-    ): Result<AuthSession> {
+    ): Result<Unit> {
         val skipVisitPull = authRepository.isSkipVisitSyncOnNextLogin()
 
-        val session = authRepository.login(identifier, password)
+        authRepository.login(identifier, password)
             .getOrElse { return Result.failure(it) }
 
         // Seed Room SSOT after login; failure still keeps the session so Home can retry sync.
@@ -27,6 +26,6 @@ class LoginUseCase(
             visitRepository.syncFromRemote()
         }
         authRepository.clearSkipVisitSyncOnNextLogin()
-        return Result.success(session)
+        return Result.success(Unit)
     }
 }

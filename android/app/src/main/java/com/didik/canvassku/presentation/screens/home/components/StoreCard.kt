@@ -46,7 +46,7 @@ import com.didik.canvassku.core.design.SurfaceContainer
 import com.didik.canvassku.core.design.SurfaceContainerLowest
 import com.didik.canvassku.core.design.TertiaryFixed
 import com.didik.canvassku.domain.model.StoreListItem
-import com.didik.canvassku.domain.model.StoreVisitStatus
+import com.didik.canvassku.domain.model.SyncStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -214,9 +214,10 @@ private fun StoreListItem.statusDetailText(): String? {
     val createdAt = latestReportCreatedAt ?: return null
     val time = WIB_TIME_FORMAT.format(Date(createdAt))
     return when (status) {
-        StoreVisitStatus.PENDING_SYNC -> "Laporan tersimpan: $time WIB (Draft)"
-        StoreVisitStatus.SYNCED -> "Selesai dikunjungi: $time WIB"
-        StoreVisitStatus.NOT_VISITED -> null
+        SyncStatus.PENDING_SYNC, SyncStatus.FAILED ->
+            "Laporan tersimpan: $time WIB (Draft)"
+        SyncStatus.SYNCED -> "Selesai dikunjungi: $time WIB"
+        SyncStatus.NOT_VISITED -> null
     }
 }
 
@@ -224,9 +225,9 @@ private val WIB_TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.forLanguageTag("i
     timeZone = TimeZone.getTimeZone("Asia/Jakarta")
 }
 
-private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
+private fun SyncStatus.toStyle(): StoreStatusStyle {
     return when (this) {
-        StoreVisitStatus.NOT_VISITED -> StoreStatusStyle(
+        SyncStatus.NOT_VISITED -> StoreStatusStyle(
             label = "Belum Dikunjungi",
             badgeIcon = Icons.Filled.Schedule,
             badgeBackground = SurfaceContainer,
@@ -238,7 +239,7 @@ private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
             actionContainer = PrimaryContainer,
             actionContent = OnPrimary,
         )
-        StoreVisitStatus.PENDING_SYNC -> StoreStatusStyle(
+        SyncStatus.PENDING_SYNC, SyncStatus.FAILED -> StoreStatusStyle(
             label = "Menunggu Kirim",
             badgeIcon = Icons.Filled.CloudUpload,
             badgeBackground = TertiaryFixed,
@@ -249,7 +250,7 @@ private fun StoreVisitStatus.toStyle(): StoreStatusStyle {
             actionLabel = "Lihat Detail",
             actionOutlined = true,
         )
-        StoreVisitStatus.SYNCED -> StoreStatusStyle(
+        SyncStatus.SYNCED -> StoreStatusStyle(
             label = "Tersinkronisasi",
             badgeIcon = Icons.Filled.CheckCircle,
             badgeBackground = SecondaryContainer,

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.didik.canvassku.data.local.entity.VisitReportEntity
+import com.didik.canvassku.domain.model.SyncStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,7 +20,7 @@ interface VisitReportDao {
     fun observeByStoreId(storeId: String): Flow<List<VisitReportEntity>>
 
     @Query("SELECT * FROM visit_reports WHERE syncStatus = :status")
-    suspend fun getBySyncStatus(status: String): List<VisitReportEntity>
+    suspend fun getBySyncStatus(status: SyncStatus): List<VisitReportEntity>
 
     @Query(
         """
@@ -39,5 +40,5 @@ interface VisitReportDao {
     suspend fun clearAll()
 
     @Query("UPDATE visit_reports SET syncStatus = :status WHERE id = :id")
-    suspend fun updateSyncStatus(id: String, status: String)
+    suspend fun updateSyncStatus(id: String, status: SyncStatus)
 }

@@ -1,7 +1,7 @@
 package com.didik.canvassku.presentation.screens.home
 
 import com.didik.canvassku.domain.model.StoreListItem
-import com.didik.canvassku.domain.model.StoreVisitStatus
+import com.didik.canvassku.domain.model.SyncStatus
 
 enum class StoreFilter {
     ALL,
@@ -23,15 +23,15 @@ data class HomeState(
     val filteredStores: List<StoreListItem>
         get() = when (filter) {
             StoreFilter.ALL -> stores
-            StoreFilter.NOT_VISITED -> stores.filter { it.status == StoreVisitStatus.NOT_VISITED }
-            StoreFilter.PENDING_SYNC -> stores.filter { it.status == StoreVisitStatus.PENDING_SYNC }
-            StoreFilter.SYNCED -> stores.filter { it.status == StoreVisitStatus.SYNCED }
+            StoreFilter.NOT_VISITED -> stores.filter { it.status == SyncStatus.NOT_VISITED }
+            StoreFilter.PENDING_SYNC -> stores.filter { it.status == SyncStatus.PENDING_SYNC }
+            StoreFilter.SYNCED -> stores.filter { it.status == SyncStatus.SYNCED }
         }
 
     val allCount: Int get() = stores.size
-    val notVisitedCount: Int get() = stores.count { it.status == StoreVisitStatus.NOT_VISITED }
-    val pendingSyncCount: Int get() = stores.count { it.status == StoreVisitStatus.PENDING_SYNC }
-    val syncedCount: Int get() = stores.count { it.status == StoreVisitStatus.SYNCED }
+    val notVisitedCount: Int get() = stores.count { it.status == SyncStatus.NOT_VISITED }
+    val pendingSyncCount: Int get() = stores.count { it.status == SyncStatus.PENDING_SYNC }
+    val syncedCount: Int get() = stores.count { it.status == SyncStatus.SYNCED }
 }
 
 sealed interface HomeEffect {

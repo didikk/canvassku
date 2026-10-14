@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,6 +32,7 @@ import com.didik.canvassku.core.design.TertiaryFixedDim
 @Composable
 fun PendingSyncBanner(
     pendingCount: Int,
+    isSending: Boolean,
     onSendNowClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -52,7 +54,11 @@ fun PendingSyncBanner(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Filled.SyncProblem,
+                    imageVector = if (isSending) {
+                        Icons.Filled.CloudUpload
+                    } else {
+                        Icons.Filled.SyncProblem
+                    },
                     contentDescription = null,
                     tint = OnTertiaryFixedVariant,
                     modifier = Modifier.size(20.dp),
@@ -60,41 +66,55 @@ fun PendingSyncBanner(
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "$pendingCount Laporan belum terkirim",
+                    text = if (isSending) {
+                        if (pendingCount == 1) {
+                            "Mengirim laporan…"
+                        } else {
+                            "Mengirim $pendingCount laporan…"
+                        }
+                    } else {
+                        "$pendingCount Laporan belum terkirim"
+                    },
                     style = MaterialTheme.typography.labelLarge,
                     color = OnTertiaryFixed,
                 )
                 Text(
-                    text = "Tersimpan di memori perangkat",
+                    text = if (isSending) {
+                        "Sedang dikirim ke server"
+                    } else {
+                        "Tersimpan di memori perangkat"
+                    },
                     style = MaterialTheme.typography.labelMedium,
                     color = OnTertiaryFixedVariant,
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Button(
-                onClick = onSendNowClick,
-                shape = RoundedCornerShape(percent = 50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = TertiaryContainer,
-                    contentColor = TertiaryFixed,
-                ),
+        if (!isSending) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
             ) {
-                Text(
-                    text = "Kirim Sekarang",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(start = 6.dp)
-                        .size(16.dp),
-                )
+                Button(
+                    onClick = onSendNowClick,
+                    shape = RoundedCornerShape(percent = 50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = TertiaryContainer,
+                        contentColor = TertiaryFixed,
+                    ),
+                ) {
+                    Text(
+                        text = "Kirim Sekarang",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(start = 6.dp)
+                            .size(16.dp),
+                    )
+                }
             }
         }
     }

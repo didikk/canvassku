@@ -5,16 +5,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.koin.core.annotation.Singleton
 
-sealed interface AuthEffect {
-    data object ForceReLogin : AuthEffect
-}
-
 @Singleton
 class AuthEventBus {
-    private val _effects = Channel<AuthEffect>(Channel.BUFFERED)
-    val effects: Flow<AuthEffect> = _effects.receiveAsFlow()
+    private val _sessionExpired = Channel<Unit>(Channel.BUFFERED)
+    val sessionExpired: Flow<Unit> = _sessionExpired.receiveAsFlow()
 
-    suspend fun emit(effect: AuthEffect) {
-        _effects.send(effect)
+    suspend fun emitSessionExpired() {
+        _sessionExpired.send(Unit)
     }
 }

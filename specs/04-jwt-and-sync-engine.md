@@ -19,7 +19,7 @@ When an API request returns **HTTP 401 Unauthorized**:
 2. **Failed Refresh / Unrecoverable Auth:**
    - If silent refresh fails (e.g., refresh token expired, user blocked), clear local session tokens from `DataStore` **only** (do **not** clear Room).
    - Persist `skip_visit_sync_on_login=true` in DataStore (survives process death; **not** cleared by `clearSession`).
-   - Send a one-time UI Side-Effect via Kotlin `Channel` (`AuthEffect.ForceReLogin`).
+   - Emit a one-shot signal via `AuthEventBus` (`Channel<Unit>` → `sessionExpired` Flow / `emitSessionExpired()`).
    - Navigate user back to `LoginScreen` and display a clear prompt: _"Sesi Anda telah berakhir. Silakan login kembali."_
    - On the subsequent login, **skip** remote visit-report pull when that flag is set, then clear the flag.
 
@@ -31,9 +31,9 @@ After successful `POST /api/auth/local`:
 
 1. **Always** seed stores: `GET /api/stores` → replace local `stores` table.
 2. **Visit reports pull** (`GET /api/visit-reports?populate=*`) when `skip_visit_sync_on_login` is **not** set:
-   - Replace local `visit_reports` with remote rows as `SYNCED` (safe after explicit logout wipe; skipped after ForceReLogin).
+   - Replace local `visit_reports` with remote rows as `SYNCED` (safe after explicit logout wipe; skipped after session-expired re-login).
    - Store absolute photo URL in `localImagePath` when local file is absent (detail UI loads via Coil).
-   - **ForceReLogin recovery login:** skip this pull entirely (flag from DataStore).
+   - **Session-expired recovery login:** skip this pull entirely (flag from DataStore).
 
 ---
 
@@ -45,7 +45,7 @@ After successful `POST /api/auth/local`:
 2. **Offline State:**
    - Network calls are skipped completely.
    - If internet is unavailable when submitting a visit report, **bypass remote JWT verification entirely**.
-   - Save the visit report immediately into Room DB with `syncStatus = "PENDING_SYNC"`.
+   - Save the visit report immediately into Room DB with `syncStatus = SyncStatus.PENDING_SYNC`, then enqueue `SyncReportWorker` (do not block navigation on network).
 
 ---
 
@@ -56,17 +56,17 @@ After successful `POST /api/auth/local`:
 
 ### Worker Execution Workflow
 
-1. **Query Pending Data:** Query `VisitReportDao` for records where `syncStatus` is `"PENDING_SYNC"` or `"FAILED"` (failed rows stay eligible for automatic / manual retry).
+1. **Query Pending Data:** Query `VisitReportDao` for records where `syncStatus` is `PENDING_SYNC` or `FAILED` (failed rows stay eligible for automatic / manual retry).
 2. **Verify / Refresh Token:**
    - Read active JWT from `DataStore`.
    - If expired, execute silent token refresh before sending payloads.
-   - If refresh fails due to invalid credentials, pause `WorkManager` execution and post a notification or event triggering re-login on next app open.
+   - If refresh fails due to invalid credentials, pause `WorkManager` execution and emit `AuthEventBus.sessionExpired` (same path as Authenticator).
 3. **Two-step upload (Strapi 5):**
    - `POST /api/upload` (multipart `files`) to store the photo; read returned file `id`.
    - `POST /api/visit-reports` (JSON) with `data`: `store`, `latitude`, `longitude`, `order_notes`, `photo` (uploaded file id).
 4. **State Transition:**
-   - **HTTP 200/201 (Success):** Update Room DB record `syncStatus = "SYNCED"`.
-   - **HTTP 5xx / Network Error:** Update Room DB record `syncStatus = "FAILED"` (eligible for manual or scheduled retry).
+   - **HTTP 200/201 (Success):** Update Room DB record `syncStatus = SYNCED`.
+   - **HTTP 5xx / Network Error:** Update Room DB record `syncStatus = FAILED` (eligible for manual or scheduled retry).
 
 ---
 

@@ -52,7 +52,7 @@ These accounts are created automatically on `npm run develop` by the bootstrap i
 
 | Document | Contents |
 | --- | --- |
-| [Development Workflow](docs/DEVELOPMENT_WORKFLOW.md) | Spec-driven planning, AI-assisted build, dual review, and field QA |
+| [Development Workflow](docs/DEVELOPMENT_WORKFLOW.md) | Spec-driven AI build, AI + manual review, tests, and field QA |
 | [Android README](android/README.md) | Architecture, package layout, auth/sync details, and tests |
 | [Backend README](backend/README.md) | Strapi setup, seeding, schemas, and JWT config |
 

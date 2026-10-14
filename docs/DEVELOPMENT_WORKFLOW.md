@@ -1,6 +1,6 @@
 # Development Workflow
 
-This is a working record of how Canvassku was planned, designed, implemented, and verified. The app was built with AI assistance, then reviewed and tested by a human engineer.
+Canvassku was built with AI assistance against written specs. After each phase, AI review checked the output against those specs. I also reviewed the code manually and ran tests plus field QA.
 
 ## Spec-Driven Method
 
@@ -16,44 +16,41 @@ Implementation started from modular specs in [`specs/`](../specs/), not from ad-
 | `06-tasks.md` | Phased checklist from Strapi setup through automated tests |
 | `DESIGN.md` | Material 3 color, type, and component tokens |
 
-Those files defined system boundaries before coding: Room owns readable state, Strapi owns remote persistence, and the sync worker bridges the gap without blocking the visit form.
+Those files defined system boundaries before coding: Room owns readable state, Strapi owns remote persistence, and the sync worker bridges the gap without blocking the visit form. Architecture details (Koin, Clean Architecture, StateFlow rules) live in `specs/01-overview-and-architecture.md`.
 
-## UI/UX Design System
+## Design System
 
-Screen layouts and Material 3 tokens were produced with AI-assisted design tooling, then captured as `specs/DESIGN.md`. The Android theme (`Color.kt`, `Type.kt`, `Theme.kt`) maps directly from that file. Screen design references for Login, Home, Visit Form, and Visit Detail are listed in `specs/05-ui-navigation-and-design.md`.
+Screen layouts and Material 3 tokens live in `specs/DESIGN.md`. The Android theme (`Color.kt`, `Type.kt`, `Theme.kt`) maps directly from that file. Screen design references for Login, Home, Visit Form, and Visit Detail are listed in `specs/05-ui-navigation-and-design.md`.
 
 Microcopy stays in Bahasa Indonesia and favors operational wording (`Tersimpan Lokal`, `Mengirim laporan…`, `Kirim Sekarang`) over abstract tech labels.
 
-## AI-Assisted Implementation
+## How Quality Is Enforced
 
-An AI coding agent kept shared context across `backend/` and `android/` so API contracts and client behavior stayed aligned. During generation, the agent had to follow these constraints:
+AI does not invent product rules. Specs lock architecture, storage, auth/sync, UI, and the phase checklist before implementation starts. Generation and review both have to match those files.
 
-- Koin Compiler Plugin (`io.insert-koin.compiler.plugin`) with K2 IR annotations (`@Module`, `@ComponentScan`, `@Single`, `@Factory`, `@KoinViewModel`). No KSP-based Koin processor.
-- Clean Architecture layer direction: Presentation → Domain → Data.
-- ViewModels expose one `*State` via `StateFlow`, update with `_uiState.update { ... }`, and send one-shot effects through a `Channel`.
-- UseCases only when validation or multi-repository orchestration is required; otherwise ViewModels call repositories directly.
+Quality is checked in layers:
 
-## Dual Code Review Process
+1. Specs first  
+   Room as SSOT, JWT refresh, WorkManager sync, and screen state rules are written down. If a change conflicts with a spec, the spec or the change is wrong; there is no silent exception.
 
-### Automated AI code review
+2. AI implementation against specs  
+   Backend and Android are generated from the same contracts so API and client stay aligned. Freeform “just make it work” code is rejected when it breaks a written rule.
 
-After each phase in `specs/06-tasks.md`, AI review prompts were run against the specs to catch:
+3. AI code review after each phase  
+   When a phase in `specs/06-tasks.md` finishes, AI review prompts are run against the specs to catch:
+   - Architecture leaks (UI talking past domain, or network writes skipping Room)
+   - Auth/sync edge cases from `03` and `04` (session-expired vs logout, skip visit pull flag, failed sync retry eligibility)
+   - Drift from DESIGN.md tokens or pending-sync banner rules  
 
-- Architecture leaks (UI talking past domain, or network writes skipping Room)
-- Missing edge cases from `03` and `04` (session-expired vs logout, skip visit pull flag, failed sync retry eligibility)
-- Drift from DESIGN.md tokens or pending-sync banner rules
+   Findings are fixed before the next phase starts.
 
-Findings were fixed before the next phase started.
+4. Manual engineering review  
+   Line-by-line review in Android Studio after AI review. Focus areas included code structure and layer boundaries, naming and readability, state ownership, concurrency and lifecycle safety, error handling, and cleanup of unused or unsafe generated code. AI review checks spec fit; this pass judges whether the code is solid enough to keep.
 
-### Manual engineering review
+5. Automated tests and field QA  
+   Unit and integration tests cover interceptor refresh, Room status transitions, and WorkManager sync (`./gradlew test`; see [android/README.md](../android/README.md)). Device checks cover the offline path below.
 
-Line-by-line review in Android Studio focused on what automated checks miss easily:
-
-- State immutability and exclusive status sealed types
-- Thread safety around token refresh and DataStore reads
-- Resource cleanup on logout (cancel WorkManager unique work, clear Room tables, clear session)
-
-## Field QA Verification
+## Field QA
 
 Offline behavior was checked on device, not only in unit tests:
 

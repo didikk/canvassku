@@ -9,14 +9,15 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import org.koin.core.annotation.Singleton
 
 private val Context.authDataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_preferences")
 
-@Singleton
-class AuthPreferences(context: Context) {
-    private val dataStore = context.applicationContext.authDataStore
+internal fun authPreferencesDataStore(context: Context): DataStore<Preferences> =
+    context.applicationContext.authDataStore
 
+class AuthPreferences(
+    private val dataStore: DataStore<Preferences>,
+) {
     @Volatile
     private var cachedJwtToken: String? = null
 

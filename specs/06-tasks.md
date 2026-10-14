@@ -50,13 +50,13 @@
 
 ## Phase 6: Automated Testing & Verification
 
-- [ ] **Unit Tests (Data Layer):**
-  - [ ] Write `AuthInterceptor` & `TokenAuthenticator` tests using `MockWebServer` to verify silent 401 token refresh logic and retry flow.
-  - [ ] Write `AuthPreferences` test using in-memory DataStore to verify token persistence and clear session actions.
-- [ ] **Unit Tests (Domain / ViewModel):**
-  - [ ] Write `VisitFormViewModelTest` verifying that saving a report triggers `SaveVisitReportUseCase` and transitions UI state to `Success`.
-  - [ ] Write `SaveVisitReportUseCaseTest` to verify that offline reports are saved to Room DB with `syncStatus = PENDING_SYNC`.
-- [ ] **Integration Tests (Room DB):**
-  - [ ] Write Room DAO in-memory database tests (`StoreDaoTest`, `VisitReportDaoTest`) verifying reactive `Flow` emissions and status update transitions (`PENDING_SYNC` → `SYNCED`) via `SyncStatus` TypeConverter.
-- [ ] **Worker Verification Test:**
-  - [ ] Write `SyncReportWorkerTest` using `WorkManagerTestInitHelper` to verify background task execution under `NetworkType.CONNECTED` constraint.
+- [x] **Unit Tests (Data Layer):**
+  - [x] Write `AuthInterceptor` & `TokenAuthenticator` tests using `MockWebServer` to verify silent 401 token refresh logic and retry flow.
+  - [x] Write `AuthPreferences` test using in-memory DataStore to verify token persistence and clear session actions.
+- [x] **Unit Tests (Domain / ViewModel):**
+  - [x] Write `VisitFormViewModelTest` verifying that saving a report triggers `SaveVisitReportUseCase` and transitions UI state to `Success`.
+  - [x] Write `SaveVisitReportUseCaseTest` to verify that offline reports are saved to Room DB with `syncStatus = PENDING_SYNC`.
+- [x] **Integration Tests (Room DB):**
+  - [x] Write Room DAO in-memory database tests (`StoreDaoTest`, `VisitReportDaoTest`) verifying reactive `Flow` emissions and status update transitions (`PENDING_SYNC` → `SYNCED`) via `SyncStatus` TypeConverter.
+- [x] **Worker Verification Test:**
+  - [x] Write `SyncReportWorkerTest` using `WorkManagerTestInitHelper` to verify background task execution under `NetworkType.CONNECTED` constraint.
